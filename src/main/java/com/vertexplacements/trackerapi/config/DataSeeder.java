@@ -13,13 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
-/**
- * Seeds the same sample data used in the frontend's mock state (index.html),
- * so the API is demo-ready immediately after startup on a fresh database.
- * Company/application seeding runs only when the companies table is empty;
- * the demo user is seeded independently, only when the users table is empty.
- */
 @Component
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
@@ -29,7 +24,6 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /** Demo login credentials — printed to the console on first startup. */
     private static final String DEMO_EMAIL = "admin@vertexplacements.com";
     private static final String DEMO_PASSWORD = "password123";
 
@@ -40,7 +34,9 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedDemoUser() {
-        if (userRepository.count() > 0) {
+        // Check for this specific account, not just "any user exists" —
+        // other accounts existing shouldn't stop the demo account from being created.
+        if (userRepository.existsByEmail(DEMO_EMAIL)) {
             return;
         }
         userRepository.save(User.builder()
@@ -61,12 +57,14 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        // Seeded applications need an owner like any other application would.
-        // Look the demo user up fresh rather than reusing a reference from
-        // seedDemoUser(), since that method may have been a no-op this run.
-        User demoUser = userRepository.findByEmail(DEMO_EMAIL)
-                .orElseThrow(() -> new IllegalStateException(
-                        "Demo user should already exist by the time companies are seeded"));
+        // Defensive: never let optional demo data crash real startup.
+        // If the demo user genuinely isn't there for some reason, just skip seeding.
+        Optional<User> demoUserOpt = userRepository.findByEmail(DEMO_EMAIL);
+        if (demoUserOpt.isEmpty()) {
+            System.out.println("Skipping demo company/application seeding — demo user not found.");
+            return;
+        }
+        User demoUser = demoUserOpt.get();
 
         Company google = companyRepository.save(Company.builder()
                 .name("Google").ctc(42.0).eligibilityCriteria("CGPA > 8.0, No backlogs")
