@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -41,7 +42,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional(readOnly = true)
     public ApplicationResponseDTO getApplicationById(String ownerEmail, Long id) {
         Long ownerId = currentUserId(ownerEmail);
-        Application application = applicationRepository.findByIdAndOwnerId(id, ownerId)
+        Application application = applicationRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
                 .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
         return toResponseDTO(application);
     }
@@ -50,9 +51,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponseDTO createApplication(String ownerEmail, ApplicationRequestDTO dto) {
         User owner = userService.getUserEntityByEmail(ownerEmail);
 
-        // The company must belong to this same user — otherwise treat it as not found,
-        // rather than revealing that a company with that id exists for someone else.
-        Company company = companyRepository.findByIdAndOwnerId(dto.getCompanyId(), owner.getId())
+        Company company = companyRepository.findByIdAndOwnerIdAndDeletedAtIsNull(dto.getCompanyId(), owner.getId())
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(dto.getCompanyId()));
 
         Application application = Application.builder()
@@ -71,7 +70,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationResponseDTO updateStatus(String ownerEmail, Long id, StatusUpdateDTO dto) {
         Long ownerId = currentUserId(ownerEmail);
-        Application application = applicationRepository.findByIdAndOwnerId(id, ownerId)
+        Application application = applicationRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
                 .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
 
         application.setStatus(dto.getStatus());
@@ -82,8 +81,41 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void deleteApplication(String ownerEmail, Long id) {
         Long ownerId = currentUserId(ownerEmail);
-        if (!applicationRepository.existsByIdAndOwnerId(id, ownerId)) {
-            throw ResourceNotFoundException.forApplication(id);
+        Application application = applicationRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
+                .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
+        application.setDeletedAt(LocalDateTime.now());
+        applicationRepository.save(application);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ApplicationResponseDTO> getTrash(String ownerEmail) {
+        Long ownerId = currentUserId(ownerEmail);
+        return applicationRepository.findDeletedByOwnerId(ownerId).stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
+    @Override
+    public ApplicationResponseDTO restoreApplication(String ownerEmail, Long id) {
+        Long ownerId = currentUserId(ownerEmail);
+        Application application = applicationRepository.findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
+        if (application.getDeletedAt() == null) {
+            throw new ResourceNotFoundException("Application is not in trash: " + id);
+        }
+        application.setDeletedAt(null);
+        Application saved = applicationRepository.save(application);
+        return toResponseDTO(saved);
+    }
+
+    @Override
+    public void permanentlyDeleteApplication(String ownerEmail, Long id) {
+        Long ownerId = currentUserId(ownerEmail);
+        Application application = applicationRepository.findByIdAndOwnerId(id, ownerId)
+                .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
+        if (application.getDeletedAt() == null) {
+            throw new ResourceNotFoundException("Application must be moved to trash before it can be permanently deleted: " + id);
         }
         applicationRepository.deleteById(id);
     }
@@ -103,6 +135,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .companyId(company != null ? company.getId() : null)
                 .companyName(company != null ? company.getName() : "Unknown")
                 .companyCtc(company != null ? company.getCtc() : null)
+                .deletedAt(application.getDeletedAt())
                 .build();
     }
 }

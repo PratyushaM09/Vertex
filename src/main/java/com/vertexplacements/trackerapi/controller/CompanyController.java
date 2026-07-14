@@ -46,6 +46,12 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.getStats(authentication.getName()));
     }
 
+    @Operation(summary = "List your deleted (trashed) companies")
+    @GetMapping("/trash")
+    public ResponseEntity<List<CompanyResponseDTO>> getTrash(Authentication authentication) {
+        return ResponseEntity.ok(companyService.getTrash(authentication.getName()));
+    }
+
     @Operation(summary = "Get a single company by id (must belong to you)")
     @GetMapping("/{id}")
     public ResponseEntity<CompanyResponseDTO> getCompanyById(Authentication authentication, @PathVariable Long id) {
@@ -67,10 +73,23 @@ public class CompanyController {
         return ResponseEntity.ok(companyService.updateCompany(authentication.getName(), id, dto));
     }
 
-    @Operation(summary = "Delete one of your own companies and its applications")
+    @Operation(summary = "Move one of your own companies to trash")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCompany(Authentication authentication, @PathVariable Long id) {
         companyService.deleteCompany(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Restore a company out of trash")
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<CompanyResponseDTO> restoreCompany(Authentication authentication, @PathVariable Long id) {
+        return ResponseEntity.ok(companyService.restoreCompany(authentication.getName(), id));
+    }
+
+    @Operation(summary = "Permanently delete a company that's already in trash")
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDeleteCompany(Authentication authentication, @PathVariable Long id) {
+        companyService.permanentlyDeleteCompany(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }
 }

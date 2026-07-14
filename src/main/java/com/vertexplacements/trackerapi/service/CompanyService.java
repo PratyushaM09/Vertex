@@ -21,4 +21,10 @@ public interface CompanyService {
     void deleteCompany(String ownerEmail, Long id);
 
     CompanyStatsDTO getStats(String ownerEmail);
+
+    List<CompanyResponseDTO> getTrash(String ownerEmail);
+
+    CompanyResponseDTO restoreCompany(String ownerEmail, Long id);
+
+    void permanentlyDeleteCompany(String ownerEmail, Long id);
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,10 @@ public class Company {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
+    /** Soft delete: null means active. Set to the deletion time when moved to trash. */
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @JsonIgnore
     @Builder.Default

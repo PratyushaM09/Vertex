@@ -17,4 +17,10 @@ public interface ApplicationService {
     ApplicationResponseDTO updateStatus(String ownerEmail, Long id, StatusUpdateDTO dto);
 
     void deleteApplication(String ownerEmail, Long id);
+
+    List<ApplicationResponseDTO> getTrash(String ownerEmail);
+
+    ApplicationResponseDTO restoreApplication(String ownerEmail, Long id);
+
+    void permanentlyDeleteApplication(String ownerEmail, Long id);
 }

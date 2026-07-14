@@ -29,6 +29,12 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getAllApplications(authentication.getName()));
     }
 
+    @Operation(summary = "List your deleted (trashed) applications")
+    @GetMapping("/trash")
+    public ResponseEntity<List<ApplicationResponseDTO>> getTrash(Authentication authentication) {
+        return ResponseEntity.ok(applicationService.getTrash(authentication.getName()));
+    }
+
     @Operation(summary = "Get one of your own applications by id")
     @GetMapping("/{id}")
     public ResponseEntity<ApplicationResponseDTO> getApplicationById(Authentication authentication, @PathVariable Long id) {
@@ -50,10 +56,23 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.updateStatus(authentication.getName(), id, dto));
     }
 
-    @Operation(summary = "Delete one of your own applications")
+    @Operation(summary = "Move one of your own applications to trash")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteApplication(Authentication authentication, @PathVariable Long id) {
         applicationService.deleteApplication(authentication.getName(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Restore an application out of trash")
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<ApplicationResponseDTO> restoreApplication(Authentication authentication, @PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.restoreApplication(authentication.getName(), id));
+    }
+
+    @Operation(summary = "Permanently delete an application that's already in trash")
+    @DeleteMapping("/{id}/permanent")
+    public ResponseEntity<Void> permanentlyDeleteApplication(Authentication authentication, @PathVariable Long id) {
+        applicationService.permanentlyDeleteApplication(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }
 }

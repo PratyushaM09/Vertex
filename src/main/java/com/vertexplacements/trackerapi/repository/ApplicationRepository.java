@@ -10,10 +10,18 @@ import java.util.Optional;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
-    Optional<Application> findByIdAndOwnerId(Long id, Long ownerId);
-
-    boolean existsByIdAndOwnerId(Long id, Long ownerId);
-
-    @Query("SELECT a FROM Application a JOIN FETCH a.company WHERE a.owner.id = :ownerId ORDER BY a.applyDate DESC, a.id DESC")
+    @Query("SELECT a FROM Application a JOIN FETCH a.company " +
+            "WHERE a.owner.id = :ownerId AND a.deletedAt IS NULL " +
+            "ORDER BY a.applyDate DESC, a.id DESC")
     List<Application> findAllWithCompanyByOwnerId(@Param("ownerId") Long ownerId);
+
+    Optional<Application> findByIdAndOwnerIdAndDeletedAtIsNull(Long id, Long ownerId);
+
+    @Query("SELECT a FROM Application a JOIN FETCH a.company " +
+            "WHERE a.owner.id = :ownerId AND a.deletedAt IS NOT NULL " +
+            "ORDER BY a.deletedAt DESC")
+    List<Application> findDeletedByOwnerId(@Param("ownerId") Long ownerId);
+
+    /** Lookup regardless of deleted state — needed for restore / permanent delete. */
+    Optional<Application> findByIdAndOwnerId(Long id, Long ownerId);
 }
