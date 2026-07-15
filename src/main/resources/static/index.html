@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VertexPlacements — Campus Placement Tracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
   html { scroll-behavior: smooth; }
@@ -450,6 +451,22 @@
         <p class="text-sm text-[#64748B] mt-1">Manage student applications and track their status.</p>
       </div>
 
+      <!-- Status Overview Chart -->
+      <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
+        <h2 class="text-base font-bold text-[#1E293B] mb-4 flex items-center gap-2">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-[#0D5C63]"></i> Applications by Status
+        </h2>
+        <div id="status-chart-content" class="flex flex-col sm:flex-row items-center gap-6">
+          <div class="w-44 h-44 shrink-0">
+            <canvas id="status-chart"></canvas>
+          </div>
+          <div id="status-chart-legend" class="flex-1 w-full space-y-2.5"></div>
+        </div>
+        <div id="status-chart-empty" class="hidden text-center py-6">
+          <p class="text-sm text-[#64748B]">No applications yet — submit one to see your status breakdown.</p>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- Submit Application Form -->
@@ -687,6 +704,14 @@ const statusStyles = {
 };
 const statusOptions = ["Applied", "Shortlisted", "Selected", "Rejected"];
 
+// ---------------- Status chart ----------------
+let statusChart = null;
+const STATUS_COLORS = {
+  Applied: '#94A3B8',
+  Shortlisted: '#2563EB',
+  Selected: '#0D5C63',
+  Rejected: '#EF4444',
+};
 const STATUS_TO_ENUM = {
   "Applied": "APPLIED", "Shortlisted": "SHORTLISTED",
   "Selected": "SELECTED", "Rejected": "REJECTED",
@@ -1088,6 +1113,8 @@ function renderCompanies() {
 
 // ---------------- Applications Table ----------------
 function renderApplications() {
+  renderStatusChart();
+
   const tbody = document.getElementById('applications-tbody');
   const empty = document.getElementById('applications-empty');
   document.getElementById('app-count').textContent = `${applications.length} total`;
@@ -1133,6 +1160,65 @@ function renderApplications() {
     `;
   }).join('');
   lucide.createIcons();
+}
+
+function renderStatusChart() {
+  const counts = { Applied: 0, Shortlisted: 0, Selected: 0, Rejected: 0 };
+  applications.forEach(a => {
+    const displayStatus = ENUM_TO_STATUS[a.status] || a.status;
+    if (counts[displayStatus] !== undefined) counts[displayStatus]++;
+  });
+
+  const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+  const chartContent = document.getElementById('status-chart-content');
+  const emptyState = document.getElementById('status-chart-empty');
+
+  if (total === 0) {
+    chartContent.classList.add('hidden');
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  chartContent.classList.remove('hidden');
+  emptyState.classList.add('hidden');
+
+  const labels = Object.keys(counts);
+  const data = Object.values(counts);
+  const colors = labels.map(l => STATUS_COLORS[l]);
+
+  const ctx = document.getElementById('status-chart').getContext('2d');
+  if (statusChart) {
+    statusChart.data.datasets[0].data = data;
+    statusChart.update();
+  } else {
+    statusChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: colors, borderWidth: 0 }],
+      },
+      options: {
+        cutout: '68%',
+        plugins: { legend: { display: false } },
+        responsive: true,
+        maintainAspectRatio: true,
+      },
+    });
+  }
+
+  const legend = document.getElementById('status-chart-legend');
+  legend.innerHTML = labels.map((label, i) => {
+    const count = data[i];
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    return `
+      <div class="flex items-center justify-between text-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${colors[i]}"></span>
+          <span class="text-[#334155] font-medium">${label}</span>
+        </div>
+        <span class="text-[#64748B]">${count} <span class="text-[#94A3B8]">(${pct}%)</span></span>
+      </div>
+    `;
+  }).join('');
 }
 
 function toggleDropdown(e, id) {
