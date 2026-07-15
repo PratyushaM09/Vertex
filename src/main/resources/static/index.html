@@ -1033,10 +1033,15 @@ async function loadApplications() {
 }
 
 // ---------------- Company Grid ----------------
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function formatDateTime(dt) {
   if (!dt) return '';
   return new Date(dt).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
+
 
 function renderCompanies() {
   const search = document.getElementById('search-input').value.toLowerCase();
