@@ -30,4 +30,8 @@ public class RegisterRequestDTO {
             message = "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a number"
     )
     private String password;
+
+    @NotBlank(message = "Roll number is required")
+    @Size(max = 50, message = "Roll number must be at most 50 characters")
+    private String rollNumber;
 }

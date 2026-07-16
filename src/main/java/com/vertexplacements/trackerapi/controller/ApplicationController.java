@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import java.util.List;
 
@@ -27,6 +29,13 @@ public class ApplicationController {
     @GetMapping
     public ResponseEntity<List<ApplicationResponseDTO>> getApplications(Authentication authentication) {
         return ResponseEntity.ok(applicationService.getAllApplications(authentication.getName()));
+    }
+
+    @Operation(summary = "List every student's applications — Placement Officers only")
+    @PreAuthorize("hasRole('PLACEMENT_OFFICER')")
+    @GetMapping("/all")
+    public ResponseEntity<List<ApplicationResponseDTO>> getAllApplicationsForOfficer() {
+        return ResponseEntity.ok(applicationService.getAllApplicationsForOfficer());
     }
 
     @Operation(summary = "List your deleted (trashed) applications")

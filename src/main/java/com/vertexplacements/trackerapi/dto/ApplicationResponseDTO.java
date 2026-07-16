@@ -18,6 +18,7 @@ public class ApplicationResponseDTO {
     private Long id;
     private String studentName;
     private String studentRoll;
+    private String studentEmail;
     private ApplicationStatus status;
     private LocalDate applyDate;
     private Long companyId;

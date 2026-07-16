@@ -9,28 +9,30 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Companies are shared across the whole college — every authenticated user (student or
+ * officer) sees the same list. Only Placement Officers can create/edit/delete them
+ * (enforced at the controller layer), so none of these queries are scoped by owner.
+ */
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
-    List<Company> findByOwnerIdAndDeletedAtIsNull(Long ownerId);
+    List<Company> findByDeletedAtIsNull();
 
-    Optional<Company> findByIdAndOwnerIdAndDeletedAtIsNull(Long id, Long ownerId);
+    Optional<Company> findByIdAndDeletedAtIsNull(Long id);
 
     @Query("SELECT c FROM Company c " +
-            "WHERE c.owner.id = :ownerId AND c.deletedAt IS NULL " +
+            "WHERE c.deletedAt IS NULL " +
             "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND c.ctc >= :minCtc " +
             "ORDER BY c.visitDate DESC")
-    List<Company> findByFilters(@Param("ownerId") Long ownerId, @Param("name") String name, @Param("minCtc") Double minCtc);
+    List<Company> findByFilters(@Param("name") String name, @Param("minCtc") Double minCtc);
 
-    @Query("SELECT MAX(c.ctc) FROM Company c WHERE c.owner.id = :ownerId AND c.deletedAt IS NULL")
-    Optional<Double> findHighestCtcByOwnerId(@Param("ownerId") Long ownerId);
+    @Query("SELECT MAX(c.ctc) FROM Company c WHERE c.deletedAt IS NULL")
+    Optional<Double> findHighestCtc();
 
-    long countByOwnerIdAndDeletedAtIsNullAndVisitDateGreaterThanEqual(Long ownerId, LocalDate date);
+    long countByDeletedAtIsNullAndVisitDateGreaterThanEqual(LocalDate date);
 
-    long countByOwnerIdAndDeletedAtIsNull(Long ownerId);
+    long countByDeletedAtIsNull();
 
-    List<Company> findByOwnerIdAndDeletedAtIsNotNull(Long ownerId);
-
-    /** Lookup regardless of deleted state — needed for restore / permanent delete. */
-    Optional<Company> findByIdAndOwnerId(Long id, Long ownerId);
+    List<Company> findByDeletedAtIsNotNull();
 }

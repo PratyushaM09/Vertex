@@ -27,52 +27,48 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CompanyResponseDTO> getAllCompanies(String ownerEmail) {
-        Long ownerId = currentUserId(ownerEmail);
-        return companyRepository.findByOwnerIdAndDeletedAtIsNull(ownerId).stream()
+    public List<CompanyResponseDTO> getAllCompanies() {
+        return companyRepository.findByDeletedAtIsNull().stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CompanyResponseDTO> filterCompanies(String ownerEmail, String name, Double minCtc) {
-        Long ownerId = currentUserId(ownerEmail);
+    public List<CompanyResponseDTO> filterCompanies(String name, Double minCtc) {
         String normalizedName = (name == null || name.isBlank()) ? null : name.trim();
         double normalizedMinCtc = (minCtc == null) ? 0.0 : minCtc;
-        return companyRepository.findByFilters(ownerId, normalizedName, normalizedMinCtc).stream()
+        return companyRepository.findByFilters(normalizedName, normalizedMinCtc).stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public CompanyResponseDTO getCompanyById(String ownerEmail, Long id) {
-        Long ownerId = currentUserId(ownerEmail);
-        Company company = companyRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
+    public CompanyResponseDTO getCompanyById(Long id) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(id));
         return toResponseDTO(company);
     }
 
     @Override
-    public CompanyResponseDTO createCompany(String ownerEmail, CompanyRequestDTO dto) {
-        User owner = userService.getUserEntityByEmail(ownerEmail);
+    public CompanyResponseDTO createCompany(String officerEmail, CompanyRequestDTO dto) {
+        User officer = userService.getUserEntityByEmail(officerEmail);
 
         Company company = Company.builder()
                 .name(dto.getName().trim())
                 .ctc(dto.getCtc())
                 .eligibilityCriteria(dto.getEligibilityCriteria().trim())
                 .visitDate(dto.getVisitDate())
-                .owner(owner)
+                .owner(officer)
                 .build();
         Company saved = companyRepository.save(company);
         return toResponseDTO(saved);
     }
 
     @Override
-    public CompanyResponseDTO updateCompany(String ownerEmail, Long id, CompanyRequestDTO dto) {
-        Long ownerId = currentUserId(ownerEmail);
-        Company company = companyRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
+    public CompanyResponseDTO updateCompany(Long id, CompanyRequestDTO dto) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(id));
 
         company.setName(dto.getName().trim());
@@ -85,9 +81,8 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public void deleteCompany(String ownerEmail, Long id) {
-        Long ownerId = currentUserId(ownerEmail);
-        Company company = companyRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
+    public void deleteCompany(Long id) {
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(id));
         company.setDeletedAt(LocalDateTime.now());
         companyRepository.save(company);
@@ -95,11 +90,10 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional(readOnly = true)
-    public CompanyStatsDTO getStats(String ownerEmail) {
-        Long ownerId = currentUserId(ownerEmail);
-        long total = companyRepository.countByOwnerIdAndDeletedAtIsNull(ownerId);
-        double highest = companyRepository.findHighestCtcByOwnerId(ownerId).orElse(0.0);
-        long active = companyRepository.countByOwnerIdAndDeletedAtIsNullAndVisitDateGreaterThanEqual(ownerId, LocalDate.now());
+    public CompanyStatsDTO getStats() {
+        long total = companyRepository.countByDeletedAtIsNull();
+        double highest = companyRepository.findHighestCtc().orElse(0.0);
+        long active = companyRepository.countByDeletedAtIsNullAndVisitDateGreaterThanEqual(LocalDate.now());
 
         return CompanyStatsDTO.builder()
                 .totalCompanies(total)
@@ -110,17 +104,15 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CompanyResponseDTO> getTrash(String ownerEmail) {
-        Long ownerId = currentUserId(ownerEmail);
-        return companyRepository.findByOwnerIdAndDeletedAtIsNotNull(ownerId).stream()
+    public List<CompanyResponseDTO> getTrash() {
+        return companyRepository.findByDeletedAtIsNotNull().stream()
                 .map(this::toResponseDTO)
                 .toList();
     }
 
     @Override
-    public CompanyResponseDTO restoreCompany(String ownerEmail, Long id) {
-        Long ownerId = currentUserId(ownerEmail);
-        Company company = companyRepository.findByIdAndOwnerId(id, ownerId)
+    public CompanyResponseDTO restoreCompany(Long id) {
+        Company company = companyRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(id));
         if (company.getDeletedAt() == null) {
             throw new ResourceNotFoundException("Company is not in trash: " + id);
@@ -131,18 +123,13 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public void permanentlyDeleteCompany(String ownerEmail, Long id) {
-        Long ownerId = currentUserId(ownerEmail);
-        Company company = companyRepository.findByIdAndOwnerId(id, ownerId)
+    public void permanentlyDeleteCompany(Long id) {
+        Company company = companyRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(id));
         if (company.getDeletedAt() == null) {
             throw new ResourceNotFoundException("Company must be moved to trash before it can be permanently deleted: " + id);
         }
         companyRepository.deleteById(id);
-    }
-
-    private Long currentUserId(String email) {
-        return userService.getUserEntityByEmail(email).getId();
     }
 
     private CompanyResponseDTO toResponseDTO(Company company) {

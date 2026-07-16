@@ -22,6 +22,10 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             "ORDER BY a.deletedAt DESC")
     List<Application> findDeletedByOwnerId(@Param("ownerId") Long ownerId);
 
-    /** Lookup regardless of deleted state — needed for restore / permanent delete. */
     Optional<Application> findByIdAndOwnerId(Long id, Long ownerId);
+
+    @Query("SELECT a FROM Application a JOIN FETCH a.company JOIN FETCH a.owner " +
+            "WHERE a.deletedAt IS NULL " +
+            "ORDER BY a.applyDate DESC, a.id DESC")
+    List<Application> findAllActiveWithCompanyAndOwner();
 }

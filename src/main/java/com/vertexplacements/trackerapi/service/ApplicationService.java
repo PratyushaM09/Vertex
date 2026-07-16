@@ -23,4 +23,6 @@ public interface ApplicationService {
     ApplicationResponseDTO restoreApplication(String ownerEmail, Long id);
 
     void permanentlyDeleteApplication(String ownerEmail, Long id);
+
+    List<ApplicationResponseDTO> getAllApplicationsForOfficer();
 }

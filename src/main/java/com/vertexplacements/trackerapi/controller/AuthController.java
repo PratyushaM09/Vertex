@@ -58,6 +58,8 @@ public class AuthController {
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .rollNumber(user.getRollNumber())
+                .role(user.getRole())
                 .build();
     }
 }

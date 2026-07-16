@@ -1,5 +1,6 @@
 package com.vertexplacements.trackerapi.dto;
 
+import com.vertexplacements.trackerapi.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,6 @@ public class AuthResponseDTO {
     private Long id;
     private String fullName;
     private String email;
+    private String rollNumber;
+    private UserRole role;
 }

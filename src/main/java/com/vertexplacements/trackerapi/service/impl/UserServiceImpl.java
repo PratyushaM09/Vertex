@@ -5,6 +5,7 @@ import com.vertexplacements.trackerapi.dto.RegisterRequestDTO;
 import com.vertexplacements.trackerapi.dto.UpdateProfileRequestDTO;
 import com.vertexplacements.trackerapi.dto.UserProfileResponseDTO;
 import com.vertexplacements.trackerapi.entity.User;
+import com.vertexplacements.trackerapi.entity.UserRole;
 import com.vertexplacements.trackerapi.exception.EmailAlreadyInUseException;
 import com.vertexplacements.trackerapi.exception.InvalidPasswordException;
 import com.vertexplacements.trackerapi.exception.ResourceNotFoundException;
@@ -31,10 +32,14 @@ public class UserServiceImpl implements UserService {
             throw new EmailAlreadyInUseException(normalizedEmail);
         }
 
+        // Self-registration always creates a STUDENT account. Placement Officer
+        // accounts are promoted directly in the database, never through signup.
         User user = User.builder()
                 .fullName(dto.getFullName().trim())
                 .email(normalizedEmail)
                 .password(passwordEncoder.encode(dto.getPassword()))
+                .rollNumber(dto.getRollNumber().trim().toUpperCase())
+                .role(UserRole.STUDENT)
                 .build();
 
         return userRepository.save(user);
@@ -57,6 +62,9 @@ public class UserServiceImpl implements UserService {
     public UserProfileResponseDTO updateProfile(String email, UpdateProfileRequestDTO dto) {
         User user = getUserEntityByEmail(email);
         user.setFullName(dto.getFullName().trim());
+        if (dto.getRollNumber() != null && !dto.getRollNumber().isBlank()) {
+            user.setRollNumber(dto.getRollNumber().trim().toUpperCase());
+        }
         return toDto(userRepository.save(user));
     }
 
@@ -77,6 +85,8 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
+                .rollNumber(user.getRollNumber())
+                .role(user.getRole())
                 .build();
     }
 }

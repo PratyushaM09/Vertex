@@ -49,18 +49,20 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public ApplicationResponseDTO createApplication(String ownerEmail, ApplicationRequestDTO dto) {
-        User owner = userService.getUserEntityByEmail(ownerEmail);
+        User student = userService.getUserEntityByEmail(ownerEmail);
 
-        Company company = companyRepository.findByIdAndOwnerIdAndDeletedAtIsNull(dto.getCompanyId(), owner.getId())
+        // Companies are shared now — any active company can be applied to, not just "your own".
+        Company company = companyRepository.findByIdAndDeletedAtIsNull(dto.getCompanyId())
                 .orElseThrow(() -> ResourceNotFoundException.forCompany(dto.getCompanyId()));
 
+        // Name and roll number come from the student's own profile, not the request body.
         Application application = Application.builder()
-                .studentName(dto.getStudentName().trim())
-                .studentRoll(dto.getStudentRoll().trim().toUpperCase())
+                .studentName(student.getFullName())
+                .studentRoll(student.getRollNumber())
                 .status(ApplicationStatus.APPLIED)
                 .applyDate(LocalDate.now())
                 .company(company)
-                .owner(owner)
+                .owner(student)
                 .build();
 
         Application saved = applicationRepository.save(application);
@@ -120,16 +122,26 @@ public class ApplicationServiceImpl implements ApplicationService {
         applicationRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ApplicationResponseDTO> getAllApplicationsForOfficer() {
+        return applicationRepository.findAllActiveWithCompanyAndOwner().stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
     private Long currentUserId(String email) {
         return userService.getUserEntityByEmail(email).getId();
     }
 
     private ApplicationResponseDTO toResponseDTO(Application application) {
         Company company = application.getCompany();
+        User owner = application.getOwner();
         return ApplicationResponseDTO.builder()
                 .id(application.getId())
                 .studentName(application.getStudentName())
                 .studentRoll(application.getStudentRoll())
+                .studentEmail(owner != null ? owner.getEmail() : null)
                 .status(application.getStatus())
                 .applyDate(application.getApplyDate())
                 .companyId(company != null ? company.getId() : null)

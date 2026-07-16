@@ -16,4 +16,6 @@ public class UpdateProfileRequestDTO {
     @NotBlank(message = "Full name is required")
     @Size(max = 150, message = "Full name must be at most 150 characters")
     private String fullName;
+    @Size(max = 50, message = "Roll number must be at most 50 characters")
+    private String rollNumber;
 }

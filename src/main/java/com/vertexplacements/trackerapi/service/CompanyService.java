@@ -8,23 +8,23 @@ import java.util.List;
 
 public interface CompanyService {
 
-    List<CompanyResponseDTO> getAllCompanies(String ownerEmail);
+    List<CompanyResponseDTO> getAllCompanies();
 
-    List<CompanyResponseDTO> filterCompanies(String ownerEmail, String name, Double minCtc);
+    List<CompanyResponseDTO> filterCompanies(String name, Double minCtc);
 
-    CompanyResponseDTO getCompanyById(String ownerEmail, Long id);
+    CompanyResponseDTO getCompanyById(Long id);
 
-    CompanyResponseDTO createCompany(String ownerEmail, CompanyRequestDTO dto);
+    CompanyResponseDTO createCompany(String officerEmail, CompanyRequestDTO dto);
 
-    CompanyResponseDTO updateCompany(String ownerEmail, Long id, CompanyRequestDTO dto);
+    CompanyResponseDTO updateCompany(Long id, CompanyRequestDTO dto);
 
-    void deleteCompany(String ownerEmail, Long id);
+    void deleteCompany(Long id);
 
-    CompanyStatsDTO getStats(String ownerEmail);
+    CompanyStatsDTO getStats();
 
-    List<CompanyResponseDTO> getTrash(String ownerEmail);
+    List<CompanyResponseDTO> getTrash();
 
-    CompanyResponseDTO restoreCompany(String ownerEmail, Long id);
+    CompanyResponseDTO restoreCompany(Long id);
 
-    void permanentlyDeleteCompany(String ownerEmail, Long id);
+    void permanentlyDeleteCompany(Long id);
 }
