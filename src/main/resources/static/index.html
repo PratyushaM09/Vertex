@@ -1,119 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VertexPlacements — Campus Placement Tracker</title>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VertexPlacements — Campus Placement Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script><style>
-  * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-  html { scroll-behavior: smooth; }
-  body { background-color: #F1F5F9; transition: background-color 0.2s ease, color 0.2s ease; }
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: #F1F5F9; }
-  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; }
-  ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+  <style>
+    * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    html { scroll-behavior: smooth; }
+    body { background-color: #F1F5F9; transition: background-color 0.2s ease, color 0.2s ease; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 
-  .fade-in { animation: fadeIn 0.35s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  .rise-in { animation: riseIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
-  @keyframes riseIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .rise-in { animation: riseIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes riseIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
-  .input-focus:focus {
-    outline: none;
-    border-color: #0D5C63;
-    box-shadow: 0 0 0 3px rgba(13, 92, 99, 0.15);
-  }
+    .input-focus:focus {
+      outline: none;
+      border-color: #0D5C63;
+      box-shadow: 0 0 0 3px rgba(13, 92, 99, 0.15);
+    }
 
-  .tab-underline {
-    position: relative;
-  }
-  .tab-underline.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: #0D5C63;
-    border-radius: 2px;
-  }
+    .tab-underline {
+      position: relative;
+    }
+    .tab-underline.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #0D5C63;
+      border-radius: 2px;
+    }
 
-  .status-dropdown { display: none; }
-  .status-wrapper:hover .status-dropdown,
-  .status-wrapper.open .status-dropdown { display: block; }
+    .status-dropdown { display: none; }
+    .status-wrapper:hover .status-dropdown,
+    .status-wrapper.open .status-dropdown { display: block; }
 
-  .avatar-dropdown { display: none; }
-  .avatar-wrapper.open .avatar-dropdown { display: block; }
+    .avatar-dropdown { display: none; }
+    .avatar-wrapper.open .avatar-dropdown { display: block; }
 
-  .range-slider { -webkit-appearance: none; height: 4px; border-radius: 4px; background: #E2E8F0; }
-  .range-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-    background: #0D5C63; cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  }
-  .range-slider::-moz-range-thumb {
-    width: 16px; height: 16px; border-radius: 50%; background: #0D5C63; cursor: pointer; border: 3px solid #fff;
-  }
+    /* ---------- Role badge (header dropdown + profile) ---------- */
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 999px;
+    }
+    .role-badge.officer { background: rgba(13,92,99,0.1); color: #0D5C63; }
+    .role-badge.student { background: rgba(120,152,133,0.18); color: #3F5A4B; }
+    body[data-theme="dark"] .role-badge.student { color: #A7C4B2; }
 
-  /* ---------- Theme toggle switch ---------- */
-  .theme-switch { position: relative; display: inline-flex; align-items: center; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
-  .theme-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
-  .theme-switch .track {
-    position: absolute; inset: 0; background: #CBD5E1; border-radius: 999px; transition: background 0.2s ease;
-  }
-  .theme-switch .thumb {
-    position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%;
-    transition: transform 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .theme-switch input:checked ~ .track { background: #0D5C63; }
-  .theme-switch input:checked ~ .track .thumb { transform: translateX(20px); }
+    .range-slider { -webkit-appearance: none; height: 4px; border-radius: 4px; background: #E2E8F0; }
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: #0D5C63; cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .range-slider::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%; background: #0D5C63; cursor: pointer; border: 3px solid #fff;
+    }
 
-  /* ---------- Landing page: status pipeline signature element ---------- */
-  .pipeline-step { position: relative; }
-  .pipeline-dot {
-    width: 10px; height: 10px; border-radius: 50%; background: #CBD5E1;
-    transition: background 0.4s ease, box-shadow 0.4s ease;
-  }
-  .pipeline-step.lit .pipeline-dot { background: #0D5C63; box-shadow: 0 0 0 4px rgba(13,92,99,0.15); }
-  .pipeline-line { height: 2px; background: #E2E8F0; flex: 1; position: relative; overflow: hidden; }
-  .pipeline-line::after {
-    content: ''; position: absolute; inset: 0; background: #0D5C63; transform: scaleX(0); transform-origin: left;
-    transition: transform 0.5s ease;
-  }
-  .pipeline-line.filled::after { transform: scaleX(1); }
+    /* ---------- Theme toggle switch ---------- */
+    .theme-switch { position: relative; display: inline-flex; align-items: center; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+    .theme-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .theme-switch .track {
+      position: absolute; inset: 0; background: #CBD5E1; border-radius: 999px; transition: background 0.2s ease;
+    }
+    .theme-switch .thumb {
+      position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%;
+      transition: transform 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .theme-switch input:checked ~ .track { background: #0D5C63; }
+    .theme-switch input:checked ~ .track .thumb { transform: translateX(20px); }
 
-  /* ---------- Dark theme ---------- */
-  body[data-theme="dark"] { background-color: #0F172A; color: #F1F5F9; }
+    /* ---------- Landing page: status pipeline signature element ---------- */
+    .pipeline-step { position: relative; }
+    .pipeline-dot {
+      width: 10px; height: 10px; border-radius: 50%; background: #CBD5E1;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+    .pipeline-step.lit .pipeline-dot { background: #0D5C63; box-shadow: 0 0 0 4px rgba(13,92,99,0.15); }
+    .pipeline-line { height: 2px; background: #E2E8F0; flex: 1; position: relative; overflow: hidden; }
+    .pipeline-line::after {
+      content: ''; position: absolute; inset: 0; background: #0D5C63; transform: scaleX(0); transform-origin: left;
+      transition: transform 0.5s ease;
+    }
+    .pipeline-line.filled::after { transform: scaleX(1); }
 
-  body[data-theme="dark"] .bg-white { background-color: #1E293B !important; }
-  body[data-theme="dark"] .bg-\[\#F1F5F9\] { background-color: #334155 !important; }
-  body[data-theme="dark"] .hover\:bg-\[\#F1F5F9\]:hover { background-color: #334155 !important; }
-  body[data-theme="dark"] .hover\:bg-\[\#F8FAFC\]:hover { background-color: #263449 !important; }
+    /* ---------- Dark theme ---------- */
+    body[data-theme="dark"] { background-color: #0F172A; color: #F1F5F9; }
 
-  body[data-theme="dark"] .text-\[\#1E293B\] { color: #F1F5F9 !important; }
-  body[data-theme="dark"] .text-\[\#334155\] { color: #CBD5E1 !important; }
-  body[data-theme="dark"] .text-\[\#64748B\] { color: #94A3B8 !important; }
+    body[data-theme="dark"] .bg-white { background-color: #1E293B !important; }
+    body[data-theme="dark"] .bg-\[\#F1F5F9\] { background-color: #334155 !important; }
+    body[data-theme="dark"] .hover\:bg-\[\#F1F5F9\]:hover { background-color: #334155 !important; }
+    body[data-theme="dark"] .hover\:bg-\[\#F8FAFC\]:hover { background-color: #263449 !important; }
 
-  body[data-theme="dark"] .border-\[\#E2E8F0\] { border-color: #334155 !important; }
-  body[data-theme="dark"] .border-\[\#CBD5E1\] { border-color: #475569 !important; }
+    body[data-theme="dark"] .text-\[\#1E293B\] { color: #F1F5F9 !important; }
+    body[data-theme="dark"] .text-\[\#334155\] { color: #CBD5E1 !important; }
+    body[data-theme="dark"] .text-\[\#64748B\] { color: #94A3B8 !important; }
 
-  body[data-theme="dark"] .bg-blue-50 { background-color: rgba(59,130,246,0.15) !important; }
-  body[data-theme="dark"] .text-blue-700 { color: #93C5FD !important; }
-  body[data-theme="dark"] .bg-red-50 { background-color: rgba(239,68,68,0.15) !important; }
-  body[data-theme="dark"] .text-red-600 { color: #FCA5A5 !important; }
-  body[data-theme="dark"] .text-red-700 { color: #FCA5A5 !important; }
-  body[data-theme="dark"] .border-red-200 { border-color: rgba(239,68,68,0.35) !important; }
+    body[data-theme="dark"] .border-\[\#E2E8F0\] { border-color: #334155 !important; }
+    body[data-theme="dark"] .border-\[\#CBD5E1\] { border-color: #475569 !important; }
 
-  body[data-theme="dark"] .pipeline-line { background: #334155; }
-  body[data-theme="dark"] .pipeline-dot { background: #475569; }
-  body[data-theme="dark"] ::-webkit-scrollbar-track { background: #0F172A; }
-  body[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; }
-  body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
-  body[data-theme="dark"] .theme-switch .track { background: #475569; }
-</style>
+    body[data-theme="dark"] .bg-blue-50 { background-color: rgba(59,130,246,0.15) !important; }
+    body[data-theme="dark"] .text-blue-700 { color: #93C5FD !important; }
+    body[data-theme="dark"] .bg-red-50 { background-color: rgba(239,68,68,0.15) !important; }
+    body[data-theme="dark"] .text-red-600 { color: #FCA5A5 !important; }
+    body[data-theme="dark"] .text-red-700 { color: #FCA5A5 !important; }
+    body[data-theme="dark"] .border-red-200 { border-color: rgba(239,68,68,0.35) !important; }
+
+    body[data-theme="dark"] .pipeline-line { background: #334155; }
+    body[data-theme="dark"] .pipeline-dot { background: #475569; }
+    body[data-theme="dark"] ::-webkit-scrollbar-track { background: #0F172A; }
+    body[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #334155; }
+    body[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    body[data-theme="dark"] .theme-switch .track { background: #475569; }
+  </style>
 </head>
 <body class="min-h-screen">
 
@@ -265,14 +275,19 @@
             </div>
             <div>
               <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Password</label>
-              <input required id="register-password" type="password" placeholder="8+ chars, upper, lower & a number" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+              <input required id="register-password" type="password" placeholder="At least 6 characters" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
             </div>
             <button type="submit" id="register-submit-btn" class="w-full bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold py-2.5 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
               Create Account
             </button>
+            <p class="text-xs text-[#94A3B8] text-center leading-relaxed">New accounts are Student accounts. Placement Officer access is granted separately by the placement cell.</p>
             <div id="register-form-error" class="hidden text-xs text-red-600 text-center"></div>
           </form>
         </div>
+
+        <p class="text-center text-xs text-[#94A3B8] mt-5">
+          Demo login (Placement Officer): <span class="font-semibold text-[#64748B]">admin@vertexplacements.com</span> / <span class="font-semibold text-[#64748B]">password123</span>
+        </p>
       </div>
     </div>
   </div>
@@ -280,1287 +295,1000 @@
   <!-- ============ APP SHELL (Companies / Applications / Profile) ============ -->
   <div id="view-app" class="hidden">
 
-  <header class="bg-white border-b border-[#E2E8F0] sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-[#0D5C63] flex items-center justify-center">
-          <i data-lucide="briefcase" class="w-5 h-5 text-white"></i>
+    <header class="bg-white border-b border-[#E2E8F0] sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-[#0D5C63] flex items-center justify-center">
+            <i data-lucide="briefcase" class="w-5 h-5 text-white"></i>
+          </div>
+          <span class="text-lg font-bold text-[#0D5C63] tracking-tight">VertexPlacements</span>
         </div>
-        <span class="text-lg font-bold text-[#0D5C63] tracking-tight">VertexPlacements</span>
-      </div>
 
-      <nav class="hidden md:flex items-center gap-8">
-        <button onclick="switchTab('companies')" id="nav-companies" class="tab-underline active pb-1 text-sm font-semibold text-[#0D5C63] flex items-center gap-2 transition">
-          <i data-lucide="building-2" class="w-4 h-4"></i> Companies
-        </button>
-        <button onclick="switchTab('applications')" id="nav-applications" class="tab-underline pb-1 text-sm font-semibold text-[#64748B] flex items-center gap-2 transition">
-          <i data-lucide="file-text" class="w-4 h-4"></i> Applications
-        </button>
-      </nav>
-
-      <div class="flex items-center gap-3">
-        <div class="avatar-wrapper relative" id="avatar-wrapper">
-          <button onclick="toggleAvatarDropdown(event)" class="w-9 h-9 rounded-full bg-[#789885]/20 hover:bg-[#789885]/30 flex items-center justify-center text-xs font-bold text-[#0D5C63] transition">
-            <span id="avatar-initials">U</span>
+        <nav class="hidden md:flex items-center gap-8">
+          <button onclick="switchTab('companies')" id="nav-companies" class="tab-underline active pb-1 text-sm font-semibold text-[#0D5C63] flex items-center gap-2 transition">
+            <i data-lucide="building-2" class="w-4 h-4"></i> Companies
           </button>
-          <div class="avatar-dropdown absolute right-0 mt-2 w-52 bg-white rounded-lg border border-[#E2E8F0] shadow-lg z-20 py-1.5 overflow-hidden">
-            <div class="px-3.5 py-2.5 border-b border-[#E2E8F0]">
-              <p id="avatar-dropdown-name" class="text-xs font-bold text-[#1E293B] truncate">User</p>
-              <p id="avatar-dropdown-email" class="text-xs text-[#94A3B8] truncate">user@example.com</p>
-            </div>
-            <button onclick="switchTab('profile'); closeAvatarDropdown();" class="w-full text-left px-3.5 py-2.5 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center gap-2">
-              <i data-lucide="settings" class="w-3.5 h-3.5"></i> Profile &amp; Settings
+          <button onclick="switchTab('applications')" id="nav-applications" class="tab-underline pb-1 text-sm font-semibold text-[#64748B] flex items-center gap-2 transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i> Applications
+          </button>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <div class="avatar-wrapper relative" id="avatar-wrapper">
+            <button onclick="toggleAvatarDropdown(event)" class="w-9 h-9 rounded-full bg-[#789885]/20 hover:bg-[#789885]/30 flex items-center justify-center text-xs font-bold text-[#0D5C63] transition">
+              <span id="avatar-initials">U</span>
             </button>
-            <button onclick="switchTab('trash'); closeAvatarDropdown();" class="w-full text-left px-3.5 py-2.5 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center gap-2">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Trash
-            </button>
-            <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2">
-              <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Log Out
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- mobile tabs -->
-    <div class="md:hidden flex border-t border-[#E2E8F0]">
-      <button onclick="switchTab('companies')" id="nav-companies-m" class="flex-1 py-3 text-sm font-semibold text-[#0D5C63] border-b-2 border-[#0D5C63]">Companies</button>
-      <button onclick="switchTab('applications')" id="nav-applications-m" class="flex-1 py-3 text-sm font-semibold text-[#64748B] border-b-2 border-transparent">Applications</button>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
-
-    <!-- API connectivity banner (shown only if the backend can't be reached) -->
-    <div id="api-error-banner" class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 flex items-start gap-2">
-      <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5 shrink-0"></i>
-      <span id="api-error-text"></span>
-    </div>
-
-    <!-- ============ COMPANIES TAB ============ -->
-    <section id="tab-companies" class="fade-in">
-
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-[#1E293B]">Companies Dashboard</h1>
-        <p class="text-sm text-[#64748B] mt-1">Track recruiting companies, drives, and offers in one place.</p>
-      </div>
-
-      <!-- Metric Bar -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-        <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[#789885]/15 flex items-center justify-center shrink-0">
-            <i data-lucide="building" class="w-6 h-6 text-[#0D5C63]"></i>
-          </div>
-          <div>
-            <p class="text-xs font-medium text-[#64748B] uppercase tracking-wide">Total Companies</p>
-            <p id="metric-total" class="text-2xl font-bold text-[#1E293B] mt-0.5">0</p>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[#789885]/15 flex items-center justify-center shrink-0">
-            <i data-lucide="trending-up" class="w-6 h-6 text-[#0D5C63]"></i>
-          </div>
-          <div>
-            <p class="text-xs font-medium text-[#64748B] uppercase tracking-wide">Highest CTC</p>
-            <p id="metric-highest" class="text-2xl font-bold text-[#1E293B] mt-0.5">0 LPA</p>
-          </div>
-        </div>
-        <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-[#789885]/15 flex items-center justify-center shrink-0">
-            <i data-lucide="radio" class="w-6 h-6 text-[#0D5C63]"></i>
-          </div>
-          <div>
-            <p class="text-xs font-medium text-[#64748B] uppercase tracking-wide">Active Drives</p>
-            <p id="metric-active" class="text-2xl font-bold text-[#1E293B] mt-0.5">0</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Add Company Form -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 sticky top-24">
-            <h2 class="text-base font-bold text-[#1E293B] mb-1 flex items-center gap-2">
-              <i data-lucide="plus-circle" class="w-4 h-4 text-[#0D5C63]"></i> Add Company
-            </h2>
-            <p class="text-xs text-[#64748B] mb-5">Register a new company for the placement drive.</p>
-
-            <form id="company-form" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Company Name</label>
-                <input required id="c-name" type="text" placeholder="e.g. Google" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+            <div class="avatar-dropdown absolute right-0 mt-2 w-52 bg-white rounded-lg border border-[#E2E8F0] shadow-lg z-20 py-1.5 overflow-hidden">
+              <div class="px-3.5 py-2.5 border-b border-[#E2E8F0]">
+                <p id="avatar-dropdown-name" class="text-xs font-bold text-[#1E293B] truncate">User</p>
+                <p id="avatar-dropdown-email" class="text-xs text-[#94A3B8] truncate mb-1.5">user@example.com</p>
+                <span class="role-badge-slot"></span>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">CTC (in LPA)</label>
-                <input required id="c-ctc" type="number" step="0.1" min="0" placeholder="e.g. 12.5" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Eligibility Criteria</label>
-                <input required id="c-eligibility" type="text" placeholder="e.g. CGPA > 7.5, No backlogs" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Visit Date</label>
-                <input required id="c-date" type="date" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <button type="submit" id="company-submit-btn" class="w-full bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                <i data-lucide="plus" class="w-4 h-4"></i> Add Company
+              <button onclick="switchTab('profile'); closeAvatarDropdown();" class="w-full text-left px-3.5 py-2.5 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center gap-2">
+                <i data-lucide="settings" class="w-3.5 h-3.5"></i> Profile &amp; Settings
               </button>
-              <div id="company-form-error" class="hidden text-xs text-red-600 mt-1"></div>
-            </form>
+              <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- mobile tabs -->
+      <div class="md:hidden flex border-t border-[#E2E8F0]">
+        <button onclick="switchTab('companies')" id="nav-companies-m" class="flex-1 py-3 text-sm font-semibold text-[#0D5C63] border-b-2 border-[#0D5C63]">Companies</button>
+        <button onclick="switchTab('applications')" id="nav-applications-m" class="flex-1 py-3 text-sm font-semibold text-[#64748B] border-b-2 border-transparent">Applications</button>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
+
+      <!-- API connectivity banner (shown only if the backend can't be reached) -->
+      <div id="api-error-banner" class="hidden mb-6 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 flex items-start gap-2">
+        <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5 shrink-0"></i>
+        <span id="api-error-text"></span>
+      </div>
+
+      <!-- ============ COMPANIES TAB ============ -->
+      <section id="tab-companies" class="fade-in">
+
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-[#1E293B]">Companies Dashboard</h1>
+          <p id="companies-subtitle" class="text-sm text-[#64748B] mt-1">Track recruiting companies, drives, and offers in one place.</p>
+        </div>
+
+        <!-- Metric Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#789885]/15 flex items-center justify-center shrink-0">
+              <i data-lucide="building" class="w-6 h-6 text-[#0D5C63]"></i>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-[#64748B] uppercase tracking-wide">Total Companies</p>
+              <p id="metric-total" class="text-2xl font-bold text-[#1E293B] mt-0.5">0</p>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#789885]/15 flex items-center justify-center shrink-0">
+              <i data-lucide="trending-up" class="w-6 h-6 text-[#0D5C63]"></i>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-[#64748B] uppercase tracking-wide">Highest CTC</p>
+              <p id="metric-highest" class="text-2xl font-bold text-[#1E293B] mt-0.5">0 LPA</p>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-[#789885]/15 flex items-center justify-center shrink-0">
+              <i data-lucide="radio" class="w-6 h-6 text-[#0D5C63]"></i>
+            </div>
+            <div>
+              <p class="text-xs font-medium text-[#64748B] uppercase tracking-wide">Active Drives</p>
+              <p id="metric-active" class="text-2xl font-bold text-[#1E293B] mt-0.5">0</p>
+            </div>
           </div>
         </div>
 
-        <!-- Filters + Grid -->
-        <div class="lg:col-span-2">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <!-- Filter Bar -->
-          <div class="bg-white rounded-xl border border-[#E2E8F0] p-5 mb-6">
-            <div class="flex flex-col sm:flex-row gap-5">
-              <div class="flex-1">
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Search Companies</label>
-                <div class="relative">
-                  <i data-lucide="search" class="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2"></i>
-                  <input id="search-input" type="text" placeholder="Search by name..." class="input-focus w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+          <!-- Add Company Form (Placement Officers only) -->
+          <div id="company-form-panel" class="lg:col-span-1">
+            <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 sticky top-24">
+              <h2 class="text-base font-bold text-[#1E293B] mb-1 flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-[#0D5C63]"></i> Add Company
+              </h2>
+              <p class="text-xs text-[#64748B] mb-5">Register a new company for the placement drive.</p>
+
+              <form id="company-form" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Company Name</label>
+                  <input required id="c-name" type="text" placeholder="e.g. Google" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
                 </div>
-              </div>
-              <div class="sm:w-64">
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">
-                  Minimum CTC: <span id="min-ctc-label" class="text-[#0D5C63]">0 LPA</span>
-                </label>
-                <input id="min-ctc-slider" type="range" min="0" max="50" value="0" step="1" class="range-slider w-full mt-3.5">
-              </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">CTC (in LPA)</label>
+                  <input required id="c-ctc" type="number" step="0.1" min="0" placeholder="e.g. 12.5" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Eligibility Criteria</label>
+                  <input required id="c-eligibility" type="text" placeholder="e.g. CGPA > 7.5, No backlogs" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Visit Date</label>
+                  <input required id="c-date" type="date" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+                </div>
+                <button type="submit" id="company-submit-btn" class="w-full bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <i data-lucide="plus" class="w-4 h-4"></i> Add Company
+                </button>
+                <div id="company-form-error" class="hidden text-xs text-red-600 mt-1"></div>
+              </form>
             </div>
           </div>
 
-          <!-- Company Grid -->
-          <div id="company-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-5"></div>
-          <div id="company-empty" class="hidden text-center py-16 bg-white rounded-xl border border-[#E2E8F0]">
-            <i data-lucide="inbox" class="w-10 h-10 text-[#CBD5E1] mx-auto mb-3"></i>
-            <p class="text-sm text-[#64748B]">No companies match your filters.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+          <!-- Filters + Grid -->
+          <div id="company-list-panel" class="lg:col-span-2">
 
-    <!-- ============ APPLICATIONS TAB ============ -->
-    <section id="tab-applications" class="fade-in hidden">
-
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-[#1E293B]">Student Applications Launchpad</h1>
-        <p class="text-sm text-[#64748B] mt-1">Manage student applications and track their status.</p>
-      </div>
-
-      <!-- Status Overview Chart -->
-      <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 mb-6">
-        <h2 class="text-base font-bold text-[#1E293B] mb-4 flex items-center gap-2">
-          <i data-lucide="pie-chart" class="w-4 h-4 text-[#0D5C63]"></i> Applications by Status
-        </h2>
-        <div id="status-chart-content" class="flex flex-col sm:flex-row items-center gap-6">
-          <div class="w-44 h-44 shrink-0">
-            <canvas id="status-chart"></canvas>
-          </div>
-          <div id="status-chart-legend" class="flex-1 w-full space-y-2.5"></div>
-        </div>
-        <div id="status-chart-empty" class="hidden text-center py-6">
-          <p class="text-sm text-[#64748B]">No applications yet — submit one to see your status breakdown.</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Submit Application Form -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 sticky top-24">
-            <h2 class="text-base font-bold text-[#1E293B] mb-1 flex items-center gap-2">
-              <i data-lucide="send" class="w-4 h-4 text-[#0D5C63]"></i> Submit Application
-            </h2>
-            <p class="text-xs text-[#64748B] mb-5">Apply a student to an open company drive.</p>
-
-            <form id="application-form" class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Student Name</label>
-                <input required id="a-name" type="text" placeholder="e.g. Riya Sharma" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Roll Number</label>
-                <input required id="a-roll" type="text" placeholder="e.g. 21CS1042" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Company</label>
-                <div class="relative">
-                  <input required id="a-company-search" type="text" autocomplete="off" placeholder="Search or add a new company..." class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-                  <input type="hidden" id="a-company-id">
-                  <div id="a-company-dropdown" class="hidden absolute left-0 right-0 mt-1.5 bg-white rounded-lg border border-[#E2E8F0] shadow-lg z-20 py-1.5 max-h-56 overflow-y-auto"></div>
-                </div>
-
-                <!-- Inline "new company" panel — appears when the typed name doesn't match an existing company -->
-                <div id="a-new-company-panel" class="hidden mt-3 p-3.5 rounded-lg border border-dashed border-[#789885] bg-[#789885]/5 space-y-2.5">
-                  <p class="text-xs font-semibold text-[#0D5C63] flex items-center gap-1.5">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> New company details
-                  </p>
-                  <input id="a-new-company-ctc" type="number" step="0.1" min="0" placeholder="CTC (in LPA)" class="input-focus w-full px-3 py-2 rounded-lg border border-[#CBD5E1] bg-white text-xs text-[#1E293B]">
-                  <input id="a-new-company-eligibility" type="text" placeholder="Eligibility criteria" class="input-focus w-full px-3 py-2 rounded-lg border border-[#CBD5E1] bg-white text-xs text-[#1E293B]">
-                  <input id="a-new-company-date" type="date" class="input-focus w-full px-3 py-2 rounded-lg border border-[#CBD5E1] bg-white text-xs text-[#1E293B]">
-                  <div class="flex gap-2 pt-1">
-                    <button type="button" id="a-new-company-confirm" class="flex-1 bg-[#0D5C63] hover:bg-[#0a494f] text-white text-xs font-semibold py-2 rounded-lg transition">Add &amp; Select</button>
-                    <button type="button" id="a-new-company-cancel" class="px-3 py-2 text-xs font-semibold text-[#64748B] hover:text-[#1E293B] transition">Cancel</button>
+            <!-- Filter Bar -->
+            <div class="bg-white rounded-xl border border-[#E2E8F0] p-5 mb-6">
+              <div class="flex flex-col sm:flex-row gap-5">
+                <div class="flex-1">
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Search Companies</label>
+                  <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2"></i>
+                    <input id="search-input" type="text" placeholder="Search by name..." class="input-focus w-full pl-9 pr-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
                   </div>
                 </div>
+                <div class="sm:w-64">
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">
+                    Minimum CTC: <span id="min-ctc-label" class="text-[#0D5C63]">0 LPA</span>
+                  </label>
+                  <input id="min-ctc-slider" type="range" min="0" max="50" value="0" step="1" class="range-slider w-full mt-3.5">
+                </div>
               </div>
-              <button type="submit" id="application-submit-btn" class="w-full bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
-                <i data-lucide="send" class="w-4 h-4"></i> Submit Application
-              </button>
-              <div id="application-form-error" class="hidden text-xs text-red-600 mt-1"></div>
-            </form>
+            </div>
+
+            <!-- Company Grid -->
+            <div id="company-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-5"></div>
+            <div id="company-empty" class="hidden text-center py-16 bg-white rounded-xl border border-[#E2E8F0]">
+              <i data-lucide="inbox" class="w-10 h-10 text-[#CBD5E1] mx-auto mb-3"></i>
+              <p class="text-sm text-[#64748B]">No companies match your filters.</p>
+            </div>
           </div>
         </div>
+      </section>
 
-        <!-- Applications Table -->
-        <div class="lg:col-span-2">
-          <div class="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden">
-            <div class="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
-              <h2 class="text-base font-bold text-[#1E293B]">Applications</h2>
-              <span id="app-count" class="text-xs font-medium text-[#64748B] bg-[#F1F5F9] px-2.5 py-1 rounded-full">0 total</span>
+      <!-- ============ APPLICATIONS TAB ============ -->
+      <section id="tab-applications" class="fade-in hidden">
+
+        <div class="mb-8">
+          <h1 id="applications-title" class="text-2xl font-bold text-[#1E293B]">Student Applications Launchpad</h1>
+          <p id="applications-subtitle" class="text-sm text-[#64748B] mt-1">Manage student applications and track their status.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- Apply form (Students only — officers manage, they don't apply) -->
+          <div id="application-form-panel" class="lg:col-span-1">
+            <div class="bg-white rounded-xl border border-[#E2E8F0] p-6 sticky top-24">
+              <h2 class="text-base font-bold text-[#1E293B] mb-1 flex items-center gap-2">
+                <i data-lucide="send" class="w-4 h-4 text-[#0D5C63]"></i> Apply to a Drive
+              </h2>
+              <p class="text-xs text-[#64748B] mb-5">Pick a company — your name and roll number come from your profile.</p>
+
+              <form id="application-form" class="space-y-4">
+                <div class="p-3.5 rounded-lg bg-[#F1F5F9] border border-[#E2E8F0] flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-[#789885]/20 flex items-center justify-center text-xs font-bold text-[#0D5C63] shrink-0">
+                    <span id="applying-as-initials">U</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-[#1E293B] truncate">Applying as <span id="applying-as-name"></span></p>
+                    <p id="applying-as-roll" class="text-xs text-[#64748B] truncate"></p>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Company</label>
+                  <div class="relative">
+                    <input required id="a-company-search" type="text" autocomplete="off" placeholder="Search open drives..." class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+                    <input type="hidden" id="a-company-id">
+                    <div id="a-company-dropdown" class="hidden absolute left-0 right-0 mt-1.5 bg-white rounded-lg border border-[#E2E8F0] shadow-lg z-20 py-1.5 max-h-56 overflow-y-auto"></div>
+                  </div>
+                </div>
+                <button type="submit" id="application-submit-btn" class="w-full bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                  <i data-lucide="send" class="w-4 h-4"></i> Submit Application
+                </button>
+                <div id="application-form-error" class="hidden text-xs text-red-600 mt-1"></div>
+              </form>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead>
+          </div>
+
+          <!-- Applications Table -->
+          <div id="applications-list-panel" class="lg:col-span-2">
+            <div class="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden">
+              <div class="px-6 py-4 border-b border-[#E2E8F0] flex items-center justify-between">
+                <h2 id="applications-table-title" class="text-base font-bold text-[#1E293B]">Applications</h2>
+                <span id="app-count" class="text-xs font-medium text-[#64748B] bg-[#F1F5F9] px-2.5 py-1 rounded-full">0 total</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
                   <tr class="text-left text-xs font-semibold text-[#64748B] uppercase tracking-wide border-b border-[#E2E8F0]">
                     <th class="px-6 py-3">Student</th>
                     <th class="px-6 py-3">Roll No.</th>
                     <th class="px-6 py-3">Company</th>
                     <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3 text-right">Actions</th>
+                    <th id="th-actions" class="px-6 py-3 text-right">Actions</th>
                   </tr>
-                </thead>
-                <tbody id="applications-tbody"></tbody>
-              </table>
-            </div>
-            <div id="applications-empty" class="hidden text-center py-16">
-              <i data-lucide="clipboard-list" class="w-10 h-10 text-[#CBD5E1] mx-auto mb-3"></i>
-              <p class="text-sm text-[#64748B]">No applications submitted yet.</p>
+                  </thead>
+                  <tbody id="applications-tbody"></tbody>
+                </table>
+              </div>
+              <div id="applications-empty" class="hidden text-center py-16">
+                <i data-lucide="clipboard-list" class="w-10 h-10 text-[#CBD5E1] mx-auto mb-3"></i>
+                <p class="text-sm text-[#64748B]">No applications submitted yet.</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ============ PROFILE & SETTINGS TAB ============ -->
-    <section id="tab-profile" class="fade-in hidden">
+      <!-- ============ PROFILE & SETTINGS TAB ============ -->
+      <section id="tab-profile" class="fade-in hidden">
 
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-[#1E293B]">Profile &amp; Settings</h1>
-        <p class="text-sm text-[#64748B] mt-1">Manage your account and how VertexPlacements looks.</p>
-      </div>
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold text-[#1E293B]">Profile &amp; Settings</h1>
+          <p class="text-sm text-[#64748B] mt-1">Manage your account and how VertexPlacements looks.</p>
+        </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-4xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-4xl">
 
-        <!-- Account card -->
-        <div class="lg:col-span-2 space-y-6">
-          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6">
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-14 h-14 rounded-full bg-[#789885]/20 flex items-center justify-center text-lg font-bold text-[#0D5C63]">
-                <span id="profile-avatar-initials">U</span>
+          <!-- Account card -->
+          <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-xl border border-[#E2E8F0] p-6">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-full bg-[#789885]/20 flex items-center justify-center text-lg font-bold text-[#0D5C63]">
+                  <span id="profile-avatar-initials">U</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <p id="profile-display-name" class="text-base font-bold text-[#1E293B]">User</p>
+                    <span class="role-badge-slot"></span>
+                  </div>
+                  <p id="profile-display-email" class="text-xs text-[#94A3B8]">user@example.com</p>
+                </div>
               </div>
-              <div>
-                <p id="profile-display-name" class="text-base font-bold text-[#1E293B]">User</p>
-                <p id="profile-display-email" class="text-xs text-[#94A3B8]">user@example.com</p>
-              </div>
-            </div>
 
-            <h2 class="text-sm font-bold text-[#1E293B] mb-4 flex items-center gap-2">
-              <i data-lucide="user-cog" class="w-4 h-4 text-[#0D5C63]"></i> General Settings
-            </h2>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Full Name</label>
-                <input id="profile-name-input" type="text" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+              <h2 class="text-sm font-bold text-[#1E293B] mb-4 flex items-center gap-2">
+                <i data-lucide="user-cog" class="w-4 h-4 text-[#0D5C63]"></i> General Settings
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Full Name</label>
+                  <input id="profile-name-input" type="text" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Email</label>
+                  <input id="profile-email-input" type="email" disabled class="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] bg-[#F1F5F9] text-sm text-[#94A3B8] cursor-not-allowed">
+                </div>
+                <div class="flex items-center gap-3">
+                  <button id="profile-save-btn" onclick="saveProfile()" class="bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
+                    Save Changes
+                  </button>
+                  <span id="profile-save-status" class="text-xs font-medium text-[#0D5C63] opacity-0 transition-opacity">Saved</span>
+                </div>
+                <div id="profile-form-error" class="hidden text-xs text-red-600"></div>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Email</label>
-                <input id="profile-email-input" type="email" disabled class="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] bg-[#F1F5F9] text-sm text-[#94A3B8] cursor-not-allowed">
-              </div>
-              <div class="flex items-center gap-3">
-                <button id="profile-save-btn" onclick="saveProfile()" class="bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
-                  Save Changes
-                </button>
-                <span id="profile-save-status" class="text-xs font-medium text-[#0D5C63] opacity-0 transition-opacity">Saved</span>
-              </div>
-              <div id="profile-form-error" class="hidden text-xs text-red-600"></div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6">
-            <h2 class="text-sm font-bold text-[#1E293B] mb-4 flex items-center gap-2">
-              <i data-lucide="lock" class="w-4 h-4 text-[#0D5C63]"></i> Change Password
-            </h2>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Current Password</label>
-                <input id="current-password-input" type="password" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">New Password</label>
-                <input id="new-password-input" type="password" placeholder="8+ chars, upper, lower & a number" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-[#1E293B] mb-1.5">Confirm New Password</label>
-                <input id="confirm-password-input" type="password" class="input-focus w-full px-3.5 py-2.5 rounded-lg border border-[#CBD5E1] bg-white text-sm text-[#1E293B] transition">
-              </div>
-              <div class="flex items-center gap-3">
-                <button id="password-save-btn" onclick="changePassword()" class="bg-[#0D5C63] hover:bg-[#0a494f] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed">
-                  Update Password
-                </button>
-                <span id="password-save-status" class="text-xs font-medium text-[#0D5C63] opacity-0 transition-opacity">Updated</span>
-              </div>
-              <div id="password-form-error" class="hidden text-xs text-red-600"></div>
             </div>
           </div>
-        </div>
 
-        <!-- Appearance card -->
-        <div class="lg:col-span-1 space-y-6">
-          <div class="bg-white rounded-xl border border-[#E2E8F0] p-6">
-            <h2 class="text-sm font-bold text-[#1E293B] mb-4 flex items-center gap-2">
-              <i data-lucide="palette" class="w-4 h-4 text-[#0D5C63]"></i> Appearance
-            </h2>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <i id="theme-icon" data-lucide="sun" class="w-4 h-4 text-[#64748B]"></i>
-                <span class="text-sm font-medium text-[#334155]">Dark Mode</span>
+          <!-- Appearance card -->
+          <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-xl border border-[#E2E8F0] p-6">
+              <h2 class="text-sm font-bold text-[#1E293B] mb-4 flex items-center gap-2">
+                <i data-lucide="palette" class="w-4 h-4 text-[#0D5C63]"></i> Appearance
+              </h2>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <i id="theme-icon" data-lucide="sun" class="w-4 h-4 text-[#64748B]"></i>
+                  <span class="text-sm font-medium text-[#334155]">Dark Mode</span>
+                </div>
+                <label class="theme-switch">
+                  <input type="checkbox" id="theme-toggle-input" onchange="toggleTheme()">
+                  <span class="track"><span class="thumb"></span></span>
+                </label>
               </div>
-              <label class="theme-switch">
-                <input type="checkbox" id="theme-toggle-input" onchange="toggleTheme()">
-                <span class="track"><span class="thumb"></span></span>
-              </label>
+              <p class="text-xs text-[#94A3B8] mt-4 leading-relaxed">Resets to Light each time you reload the page.</p>
             </div>
-            <p class="text-xs text-[#94A3B8] mt-4 leading-relaxed">Resets to Light each time you reload the page.</p>
+
+            <button onclick="logout()" class="w-full bg-white hover:bg-red-50 text-red-600 text-sm font-semibold py-2.5 rounded-lg border border-[#E2E8F0] transition flex items-center justify-center gap-2">
+              <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
+            </button>
           </div>
-
-          <button onclick="logout()" class="w-full bg-white hover:bg-red-50 text-red-600 text-sm font-semibold py-2.5 rounded-lg border border-[#E2E8F0] transition flex items-center justify-center gap-2">
-            <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
-          </button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ============ TRASH TAB ============ -->
-    <section id="tab-trash" class="fade-in hidden">
-
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-[#1E293B]">Trash</h1>
-        <p class="text-sm text-[#64748B] mt-1">Deleted companies and applications. Restore them anytime, or delete forever.</p>
-      </div>
-
-      <div class="mb-10">
-        <h2 class="text-base font-bold text-[#1E293B] mb-4 flex items-center gap-2">
-          <i data-lucide="building-2" class="w-4 h-4 text-[#0D5C63]"></i> Deleted Companies
-        </h2>
-        <div id="trash-companies-list" class="space-y-3"></div>
-        <div id="trash-companies-empty" class="hidden text-center py-10 bg-white rounded-xl border border-[#E2E8F0]">
-          <p class="text-sm text-[#64748B]">No deleted companies.</p>
-        </div>
-      </div>
-
-      <div>
-        <h2 class="text-base font-bold text-[#1E293B] mb-4 flex items-center gap-2">
-          <i data-lucide="file-text" class="w-4 h-4 text-[#0D5C63]"></i> Deleted Applications
-        </h2>
-        <div id="trash-applications-list" class="space-y-3"></div>
-        <div id="trash-applications-empty" class="hidden text-center py-10 bg-white rounded-xl border border-[#E2E8F0]">
-          <p class="text-sm text-[#64748B]">No deleted applications.</p>
-        </div>
-      </div>
-    </section>
-
-  </main>
+    </main>
 
   </div>
 
 </div>
 
 <script>
-lucide.createIcons();
-
-// ---------------- API Configuration ----------------
-// Change this if your backend runs on a different host/port.
-const API_BASE = '/api';
-
-// ---------------- Auth State (in-memory only — cleared on refresh) ----------------
-let authToken = null;
-let currentUser = null; // { id, fullName, email }
-
-// ---------------- App State ----------------
-let companies = [];
-let applications = [];
-let pendingNewCompanyName = ''; // holds the typed name while the inline "add company" panel is open
-
-const statusStyles = {
-  "Applied":     "bg-[#F1F5F9] text-[#334155]",
-  "Shortlisted": "bg-blue-50 text-blue-700",
-  "Selected":    "bg-[#789885]/15 text-[#0D5C63]",
-  "Rejected":    "bg-red-50 text-red-600",
-};
-const statusOptions = ["Applied", "Shortlisted", "Selected", "Rejected"];
-
-// ---------------- Status chart ----------------
-let statusChart = null;
-const STATUS_COLORS = {
-  Applied: '#94A3B8',
-  Shortlisted: '#2563EB',
-  Selected: '#0D5C63',
-  Rejected: '#EF4444',
-};
-const STATUS_TO_ENUM = {
-  "Applied": "APPLIED", "Shortlisted": "SHORTLISTED",
-  "Selected": "SELECTED", "Rejected": "REJECTED",
-};
-const ENUM_TO_STATUS = {
-  APPLIED: "Applied", SHORTLISTED: "Shortlisted",
-  SELECTED: "Selected", REJECTED: "Rejected",
-};
-
-// =================================================================
-// API Helper — attaches the JWT automatically and handles 401s globally
-// =================================================================
-async function apiFetch(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-
-  if (res.status === 401 && path !== '/auth/login' && path !== '/auth/register') {
-    handleSessionExpired();
-    throw new Error('Session expired. Please log in again.');
-  }
-
-  if (!res.ok) {
-    let message = `Request failed (HTTP ${res.status})`;
-    try {
-      const err = await res.json();
-      if (err?.message) message = err.message;
-      if (err?.details?.length) message += ': ' + err.details.join(', ');
-    } catch (_) { /* response wasn't JSON, keep default message */ }
-    throw new Error(message);
-  }
-  if (res.status === 204) return null;
-  return res.json();
-}
-
-function showApiError(message) {
-  document.getElementById('api-error-text').textContent = message;
-  document.getElementById('api-error-banner').classList.remove('hidden');
   lucide.createIcons();
-}
-function hideApiError() {
-  document.getElementById('api-error-banner').classList.add('hidden');
-}
-function connectionHint(err) {
-  return `Can't reach the API at ${API_BASE}. Make sure the Spring Boot backend is running (mvn spring-boot:run). (${err.message})`;
-}
 
-// =================================================================
-// Screen Routing: landing -> auth -> app
-// =================================================================
-function showScreen(screen) {
-  document.getElementById('view-landing').classList.toggle('hidden', screen !== 'landing');
-  document.getElementById('view-auth').classList.toggle('hidden', screen !== 'auth');
-  document.getElementById('view-app').classList.toggle('hidden', screen !== 'app');
-  window.scrollTo(0, 0);
-}
+  // ---------------- API Configuration ----------------
+  // Served from the backend itself (Render or localhost) -> use the same origin.
+  // Opened directly as a file (file://) -> fall back to the local dev server.
+  const API_BASE = window.location.protocol.startsWith('http')
+    ? `${window.location.origin}/api`
+    : 'http://localhost:8080/api';
 
-function openAuth(mode) {
-  showScreen('auth');
-  setAuthMode(mode);
-}
+  // ---------------- Auth State (in-memory only — cleared on refresh) ----------------
+  let authToken = null;
+  let currentUser = null; // { id, fullName, email, role, rollNumber? }
+  // role is exactly "STUDENT" or "PLACEMENT_OFFICER" — the backend never sends
+  // ROLE_-prefixed or other variants in JSON.
+  function isOfficer() { return currentUser?.role === 'PLACEMENT_OFFICER'; }
+  function roleLabel() { return isOfficer() ? 'Placement Officer' : 'Student'; }
 
-function setAuthMode(mode) {
-  const isLogin = mode === 'login';
-  document.getElementById('login-form').classList.toggle('hidden', !isLogin);
-  document.getElementById('register-form').classList.toggle('hidden', isLogin);
+  // ---------------- App State ----------------
+  let companies = [];
+  let applications = [];
 
-  const setActive = (el, active) => {
-    el.classList.toggle('active', active);
-    el.classList.toggle('text-[#0D5C63]', active);
-    el.classList.toggle('text-[#64748B]', !active);
+  const statusStyles = {
+    "Applied":     "bg-[#F1F5F9] text-[#334155]",
+    "Shortlisted": "bg-blue-50 text-blue-700",
+    "Selected":    "bg-[#789885]/15 text-[#0D5C63]",
+    "Rejected":    "bg-red-50 text-red-600",
   };
-  setActive(document.getElementById('auth-tab-login'), isLogin);
-  setActive(document.getElementById('auth-tab-register'), !isLogin);
-}
+  const statusOptions = ["Applied", "Shortlisted", "Selected", "Rejected"];
 
-function handleSessionExpired() {
-  authToken = null;
-  currentUser = null;
-  showScreen('auth');
-  setAuthMode('login');
-  const errorBox = document.getElementById('login-form-error');
-  errorBox.textContent = 'Your session expired. Please log in again.';
-  errorBox.classList.remove('hidden');
-}
-
-// =================================================================
-// Authentication
-// =================================================================
-function onAuthSuccess(response) {
-  authToken = response.token;
-  currentUser = { id: response.id, fullName: response.fullName, email: response.email };
-  updateUserChrome();
-  showScreen('app');
-  switchTab('companies');
-  loadCompanies();
-  loadStats();
-  loadApplications();
-}
-
-function updateUserChrome() {
-  if (!currentUser) return;
-  const initials = currentUser.fullName.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
-  document.getElementById('avatar-initials').textContent = initials || 'U';
-  document.getElementById('avatar-dropdown-name').textContent = currentUser.fullName;
-  document.getElementById('avatar-dropdown-email').textContent = currentUser.email;
-  document.getElementById('profile-avatar-initials').textContent = initials || 'U';
-  document.getElementById('profile-display-name').textContent = currentUser.fullName;
-  document.getElementById('profile-display-email').textContent = currentUser.email;
-  document.getElementById('profile-name-input').value = currentUser.fullName;
-  document.getElementById('profile-email-input').value = currentUser.email;
-}
-
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('login-submit-btn');
-  const errorBox = document.getElementById('login-form-error');
-  errorBox.classList.add('hidden');
-  btn.disabled = true;
-
-  const payload = {
-    email: document.getElementById('login-email').value,
-    password: document.getElementById('login-password').value,
+  const STATUS_TO_ENUM = {
+    "Applied": "APPLIED", "Shortlisted": "SHORTLISTED",
+    "Selected": "SELECTED", "Rejected": "REJECTED",
+  };
+  const ENUM_TO_STATUS = {
+    APPLIED: "Applied", SHORTLISTED: "Shortlisted",
+    SELECTED: "Selected", REJECTED: "Rejected",
   };
 
-  try {
-    const response = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload) });
-    onAuthSuccess(response);
-  } catch (err) {
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
+  // =================================================================
+  // API Helper — attaches the JWT automatically and handles 401s globally
+  // =================================================================
+  async function apiFetch(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+
+    if (res.status === 401 && path !== '/auth/login' && path !== '/auth/register') {
+      handleSessionExpired();
+      throw new Error('Session expired. Please log in again.');
+    }
+
+    if (res.status === 403) {
+      throw new Error(`This action needs Placement Officer access. You're signed in as a ${roleLabel().toLowerCase()}.`);
+    }
+
+    if (!res.ok) {
+      let message = `Request failed (HTTP ${res.status})`;
+      try {
+        const err = await res.json();
+        if (err?.message) message = err.message;
+        if (err?.details?.length) message += ': ' + err.details.join(', ');
+      } catch (_) { /* response wasn't JSON, keep default message */ }
+      throw new Error(message);
+    }
+    if (res.status === 204) return null;
+    return res.json();
   }
-});
 
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('register-submit-btn');
-  const errorBox = document.getElementById('register-form-error');
-  errorBox.classList.add('hidden');
-  btn.disabled = true;
-
-  const payload = {
-    fullName: document.getElementById('register-name').value,
-    email: document.getElementById('register-email').value,
-    password: document.getElementById('register-password').value,
-  };
-
-  try {
-    const response = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
-    onAuthSuccess(response);
-  } catch (err) {
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
+  function showApiError(message) {
+    document.getElementById('api-error-text').textContent = message;
+    document.getElementById('api-error-banner').classList.remove('hidden');
+    lucide.createIcons();
   }
-});
+  function hideApiError() {
+    document.getElementById('api-error-banner').classList.add('hidden');
+  }
+  function connectionHint(err) {
+    return `Can't reach the API at ${API_BASE}. Make sure the Spring Boot backend is running (mvn spring-boot:run). (${err.message})`;
+  }
 
-function logout() {
-  authToken = null;
-  currentUser = null;
-  closeAvatarDropdown();
-  document.getElementById('login-form').reset();
-  document.getElementById('register-form').reset();
-  showScreen('landing');
-}
+  // =================================================================
+  // Screen Routing: landing -> auth -> app
+  // =================================================================
+  function showScreen(screen) {
+    document.getElementById('view-landing').classList.toggle('hidden', screen !== 'landing');
+    document.getElementById('view-auth').classList.toggle('hidden', screen !== 'auth');
+    document.getElementById('view-app').classList.toggle('hidden', screen !== 'app');
+    window.scrollTo(0, 0);
+  }
 
-// ---------------- Avatar Dropdown ----------------
-function toggleAvatarDropdown(e) {
-  e.stopPropagation();
-  document.getElementById('avatar-wrapper').classList.toggle('open');
-}
-function closeAvatarDropdown() {
-  document.getElementById('avatar-wrapper').classList.remove('open');
-}
-document.addEventListener('click', () => closeAvatarDropdown());
+  function openAuth(mode) {
+    showScreen('auth');
+    setAuthMode(mode);
+  }
 
-// =================================================================
-// Profile & Settings
-// =================================================================
-async function saveProfile() {
-  const btn = document.getElementById('profile-save-btn');
-  const errorBox = document.getElementById('profile-form-error');
-  const statusLabel = document.getElementById('profile-save-status');
-  errorBox.classList.add('hidden');
-  btn.disabled = true;
+  function setAuthMode(mode) {
+    const isLogin = mode === 'login';
+    document.getElementById('login-form').classList.toggle('hidden', !isLogin);
+    document.getElementById('register-form').classList.toggle('hidden', isLogin);
 
-  const fullName = document.getElementById('profile-name-input').value.trim();
+    const setActive = (el, active) => {
+      el.classList.toggle('active', active);
+      el.classList.toggle('text-[#0D5C63]', active);
+      el.classList.toggle('text-[#64748B]', !active);
+    };
+    setActive(document.getElementById('auth-tab-login'), isLogin);
+    setActive(document.getElementById('auth-tab-register'), !isLogin);
+  }
 
-  try {
-    const updated = await apiFetch('/users/me', { method: 'PUT', body: JSON.stringify({ fullName }) });
-    currentUser.fullName = updated.fullName;
+  function handleSessionExpired() {
+    authToken = null;
+    currentUser = null;
+    showScreen('auth');
+    setAuthMode('login');
+    const errorBox = document.getElementById('login-form-error');
+    errorBox.textContent = 'Your session expired. Please log in again.';
+    errorBox.classList.remove('hidden');
+  }
+
+  // =================================================================
+  // Authentication
+  // =================================================================
+  function onAuthSuccess(response) {
+    authToken = response.token;
+    currentUser = {
+      id: response.id,
+      fullName: response.fullName,
+      email: response.email,
+      role: response.role || 'STUDENT', // "STUDENT" | "PLACEMENT_OFFICER"
+    };
     updateUserChrome();
-    statusLabel.textContent = 'Saved';
-    statusLabel.classList.remove('opacity-0');
-    setTimeout(() => statusLabel.classList.add('opacity-0'), 1800);
-  } catch (err) {
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function changePassword() {
-  const btn = document.getElementById('password-save-btn');
-  const errorBox = document.getElementById('password-form-error');
-  const statusLabel = document.getElementById('password-save-status');
-  errorBox.classList.add('hidden');
-
-  const currentPassword = document.getElementById('current-password-input').value;
-  const newPassword = document.getElementById('new-password-input').value;
-  const confirmPassword = document.getElementById('confirm-password-input').value;
-
-  if (!currentPassword || !newPassword) {
-    errorBox.textContent = 'Fill in both your current and new password.';
-    errorBox.classList.remove('hidden');
-    return;
-  }
-  if (newPassword !== confirmPassword) {
-    errorBox.textContent = "New password and confirmation don't match.";
-    errorBox.classList.remove('hidden');
-    return;
+    applyRoleUI();
+    showScreen('app');
+    switchTab('companies');
+    loadCompanies();
+    loadStats();
+    loadApplications();
+    // The auth response has the role; the profile may carry more (e.g. roll number).
+    apiFetch('/users/me').then(me => {
+      if (me.role) currentUser.role = me.role;
+      const roll = me.rollNumber ?? me.studentRoll ?? me.roll;
+      if (roll) currentUser.rollNumber = roll;
+      updateUserChrome();
+      applyRoleUI();
+    }).catch(() => {});
   }
 
-  btn.disabled = true;
-  try {
-    await apiFetch('/users/me/password', {
-      method: 'PUT',
-      body: JSON.stringify({ currentPassword, newPassword }),
+  // =================================================================
+  // Role-based UI — everything that differs between Student & Officer
+  // =================================================================
+  function applyRoleUI() {
+    const officer = isOfficer();
+
+    // Role badges (header dropdown + profile card)
+    document.querySelectorAll('.role-badge-slot').forEach(el => {
+      el.innerHTML = `<span class="role-badge ${officer ? 'officer' : 'student'}">${roleLabel()}</span>`;
     });
-    document.getElementById('current-password-input').value = '';
-    document.getElementById('new-password-input').value = '';
-    document.getElementById('confirm-password-input').value = '';
-    statusLabel.textContent = 'Updated';
-    statusLabel.classList.remove('opacity-0');
-    setTimeout(() => statusLabel.classList.add('opacity-0'), 1800);
-  } catch (err) {
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
+
+    // Companies tab: only officers can add or delete companies.
+    document.getElementById('company-form-panel').classList.toggle('hidden', !officer);
+    const listPanel = document.getElementById('company-list-panel');
+    listPanel.classList.toggle('lg:col-span-2', officer);
+    listPanel.classList.toggle('lg:col-span-3', !officer);
+    document.getElementById('companies-subtitle').textContent = officer
+      ? 'Track recruiting companies, drives, and offers in one place.'
+      : 'Browse open drives — check the eligibility criteria before you apply.';
+
+    // Applications tab:
+    //  - POST /api/applications is always self-scoped (backend fills in the
+    //    caller's name and roll), so the submit form only makes sense for
+    //    students. Officers get no form — just the college-wide table.
+    document.getElementById('application-form-panel').classList.toggle('hidden', officer);
+    const appList = document.getElementById('applications-list-panel');
+    appList.classList.toggle('lg:col-span-2', !officer);
+    appList.classList.toggle('lg:col-span-3', officer);
+
+    document.getElementById('applications-title').textContent = officer
+      ? 'Applications Overview' : 'My Applications';
+    document.getElementById('applications-subtitle').textContent = officer
+      ? "Every student's application across all drives — update statuses as results come in."
+      : 'Apply to a drive and follow your status from Applied to Selected.';
+    document.getElementById('applications-table-title').textContent = officer
+      ? 'All Applications' : 'My Applications';
+    document.getElementById('th-actions').classList.toggle('hidden', !officer);
+
+    lucide.createIcons();
+    renderCompanies();
+    renderApplications();
   }
-}
 
-// ---------------- Theme Toggle ----------------
-function toggleTheme() {
-  const isDark = document.getElementById('theme-toggle-input').checked;
-  document.body.dataset.theme = isDark ? 'dark' : 'light';
-  const icon = document.getElementById('theme-icon');
-  icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
-  lucide.createIcons();
-}
-
-// =================================================================
-// Landing Page: animated status pipeline (signature element)
-// =================================================================
-function animateLandingPipeline() {
-  const steps = document.querySelectorAll('#landing-pipeline .pipeline-step');
-  const lines = document.querySelectorAll('#landing-pipeline .pipeline-line');
-  if (steps.length === 0) return;
-  let current = 0;
-
-  function tick() {
-    steps.forEach((s, i) => s.classList.toggle('lit', i <= current));
-    lines.forEach((l, i) => l.classList.toggle('filled', i < current));
-    current = (current + 1) % (steps.length + 1);
+  function updateUserChrome() {
+    if (!currentUser) return;
+    const initials = currentUser.fullName.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    document.getElementById('avatar-initials').textContent = initials || 'U';
+    document.getElementById('avatar-dropdown-name').textContent = currentUser.fullName;
+    document.getElementById('avatar-dropdown-email').textContent = currentUser.email;
+    document.getElementById('profile-avatar-initials').textContent = initials || 'U';
+    document.getElementById('profile-display-name').textContent = currentUser.fullName;
+    document.getElementById('profile-display-email').textContent = currentUser.email;
+    document.getElementById('profile-name-input').value = currentUser.fullName;
+    document.getElementById('profile-email-input').value = currentUser.email;
+    // "Applying as" card on the student apply form
+    document.getElementById('applying-as-initials').textContent = initials || 'U';
+    document.getElementById('applying-as-name').textContent = currentUser.fullName;
+    document.getElementById('applying-as-roll').textContent =
+      currentUser.rollNumber ? `Roll no. ${currentUser.rollNumber}` : 'Roll number is taken from your profile';
   }
-  tick();
-  setInterval(tick, 1100);
-}
 
-// =================================================================
-// Tab Switching (within the app shell)
-// =================================================================
-function switchTab(tab) {
-  document.getElementById('tab-companies').classList.toggle('hidden', tab !== 'companies');
-  document.getElementById('tab-applications').classList.toggle('hidden', tab !== 'applications');
-  document.getElementById('tab-profile').classList.toggle('hidden', tab !== 'profile');
-  document.getElementById('tab-trash').classList.toggle('hidden', tab !== 'trash');
-  const setActive = (el, active) => {
-    el.classList.toggle('active', active);
-    el.classList.toggle('text-[#0D5C63]', active);
-    el.classList.toggle('text-[#64748B]', !active);
-  };
-  setActive(document.getElementById('nav-companies'), tab === 'companies');
-  setActive(document.getElementById('nav-applications'), tab === 'applications');
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('login-submit-btn');
+    const errorBox = document.getElementById('login-form-error');
+    errorBox.classList.add('hidden');
+    btn.disabled = true;
 
-  document.getElementById('nav-companies-m').classList.toggle('text-[#0D5C63]', tab === 'companies');
-  document.getElementById('nav-companies-m').classList.toggle('border-[#0D5C63]', tab === 'companies');
-  document.getElementById('nav-companies-m').classList.toggle('text-[#64748B]', tab !== 'companies');
-  document.getElementById('nav-companies-m').classList.toggle('border-transparent', tab !== 'companies');
+    const payload = {
+      email: document.getElementById('login-email').value,
+      password: document.getElementById('login-password').value,
+    };
 
-  document.getElementById('nav-applications-m').classList.toggle('text-[#0D5C63]', tab === 'applications');
-  document.getElementById('nav-applications-m').classList.toggle('border-[#0D5C63]', tab === 'applications');
-  document.getElementById('nav-applications-m').classList.toggle('text-[#64748B]', tab !== 'applications');
-  document.getElementById('nav-applications-m').classList.toggle('border-transparent', tab !== 'applications');
-  if (tab === 'trash') {
-    loadTrash();
+    try {
+      const response = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(payload) });
+      onAuthSuccess(response);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('register-submit-btn');
+    const errorBox = document.getElementById('register-form-error');
+    errorBox.classList.add('hidden');
+    btn.disabled = true;
+
+    const payload = {
+      fullName: document.getElementById('register-name').value,
+      email: document.getElementById('register-email').value,
+      password: document.getElementById('register-password').value,
+    };
+
+    try {
+      const response = await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) });
+      onAuthSuccess(response);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function logout() {
+    authToken = null;
+    currentUser = null;
+    closeAvatarDropdown();
+    document.getElementById('login-form').reset();
+    document.getElementById('register-form').reset();
+    showScreen('landing');
   }
-}
 
-// =================================================================
-// Data Loading
-// =================================================================
-async function loadCompanies() {
-  try {
-    companies = await apiFetch('/companies');
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(connectionHint(err));
-    companies = [];
+  // ---------------- Avatar Dropdown ----------------
+  function toggleAvatarDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('avatar-wrapper').classList.toggle('open');
   }
-  renderCompanies();
-}
-
-async function loadStats() {
-  try {
-    const stats = await apiFetch('/companies/stats');
-    document.getElementById('metric-total').textContent = stats.totalCompanies;
-    document.getElementById('metric-highest').textContent = `${stats.highestCtc} LPA`;
-    document.getElementById('metric-active').textContent = stats.activeDrives;
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(connectionHint(err));
+  function closeAvatarDropdown() {
+    document.getElementById('avatar-wrapper').classList.remove('open');
   }
-}
+  document.addEventListener('click', () => closeAvatarDropdown());
 
-async function loadApplications() {
-  try {
-    applications = await apiFetch('/applications');
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(connectionHint(err));
-    applications = [];
+  // =================================================================
+  // Profile & Settings
+  // =================================================================
+  async function saveProfile() {
+    const btn = document.getElementById('profile-save-btn');
+    const errorBox = document.getElementById('profile-form-error');
+    const statusLabel = document.getElementById('profile-save-status');
+    errorBox.classList.add('hidden');
+    btn.disabled = true;
+
+    const fullName = document.getElementById('profile-name-input').value.trim();
+
+    try {
+      const updated = await apiFetch('/users/me', { method: 'PUT', body: JSON.stringify({ fullName }) });
+      currentUser.fullName = updated.fullName;
+      if (updated.role) currentUser.role = updated.role;
+      updateUserChrome();
+      statusLabel.textContent = 'Saved';
+      statusLabel.classList.remove('opacity-0');
+      setTimeout(() => statusLabel.classList.add('opacity-0'), 1800);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
   }
-  renderApplications();
-}
 
-// ---------------- Company Grid ----------------
-function formatDate(d) {
-  return new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+  // ---------------- Theme Toggle ----------------
+  function toggleTheme() {
+    const isDark = document.getElementById('theme-toggle-input').checked;
+    document.body.dataset.theme = isDark ? 'dark' : 'light';
+    const icon = document.getElementById('theme-icon');
+    icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+    lucide.createIcons();
+  }
 
-function formatDateTime(dt) {
-  if (!dt) return '';
-  return new Date(dt).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
+  // =================================================================
+  // Landing Page: animated status pipeline (signature element)
+  // =================================================================
+  function animateLandingPipeline() {
+    const steps = document.querySelectorAll('#landing-pipeline .pipeline-step');
+    const lines = document.querySelectorAll('#landing-pipeline .pipeline-line');
+    if (steps.length === 0) return;
+    let current = 0;
 
+    function tick() {
+      steps.forEach((s, i) => s.classList.toggle('lit', i <= current));
+      lines.forEach((l, i) => l.classList.toggle('filled', i < current));
+      current = (current + 1) % (steps.length + 1);
+    }
+    tick();
+    setInterval(tick, 1100);
+  }
 
-function renderCompanies() {
-  const search = document.getElementById('search-input').value.toLowerCase();
-  const minCtc = parseFloat(document.getElementById('min-ctc-slider').value);
+  // =================================================================
+  // Tab Switching (within the app shell)
+  // =================================================================
+  function switchTab(tab) {
+    document.getElementById('tab-companies').classList.toggle('hidden', tab !== 'companies');
+    document.getElementById('tab-applications').classList.toggle('hidden', tab !== 'applications');
+    document.getElementById('tab-profile').classList.toggle('hidden', tab !== 'profile');
 
-  const filtered = companies.filter(c =>
-    c.name.toLowerCase().includes(search) && c.ctc >= minCtc
-  );
+    const setActive = (el, active) => {
+      el.classList.toggle('active', active);
+      el.classList.toggle('text-[#0D5C63]', active);
+      el.classList.toggle('text-[#64748B]', !active);
+    };
+    setActive(document.getElementById('nav-companies'), tab === 'companies');
+    setActive(document.getElementById('nav-applications'), tab === 'applications');
 
-  const grid = document.getElementById('company-grid');
-  const empty = document.getElementById('company-empty');
+    document.getElementById('nav-companies-m').classList.toggle('text-[#0D5C63]', tab === 'companies');
+    document.getElementById('nav-companies-m').classList.toggle('border-[#0D5C63]', tab === 'companies');
+    document.getElementById('nav-companies-m').classList.toggle('text-[#64748B]', tab !== 'companies');
+    document.getElementById('nav-companies-m').classList.toggle('border-transparent', tab !== 'companies');
 
-  if (filtered.length === 0) {
-    grid.innerHTML = '';
-    empty.classList.remove('hidden');
-  } else {
-    empty.classList.add('hidden');
-    grid.innerHTML = filtered.map(c => `
-      <div class="bg-white rounded-xl border border-[#E2E8F0] p-5 hover:border-[#789885] transition group fade-in">
-        <div class="flex items-start justify-between mb-3">
-          <div class="w-11 h-11 rounded-xl bg-[#0D5C63]/10 flex items-center justify-center">
-            <i data-lucide="building-2" class="w-5 h-5 text-[#0D5C63]"></i>
+    document.getElementById('nav-applications-m').classList.toggle('text-[#0D5C63]', tab === 'applications');
+    document.getElementById('nav-applications-m').classList.toggle('border-[#0D5C63]', tab === 'applications');
+    document.getElementById('nav-applications-m').classList.toggle('text-[#64748B]', tab !== 'applications');
+    document.getElementById('nav-applications-m').classList.toggle('border-transparent', tab !== 'applications');
+  }
+
+  // =================================================================
+  // Data Loading
+  // =================================================================
+  async function loadCompanies() {
+    try {
+      companies = await apiFetch('/companies');
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      showApiError(connectionHint(err));
+      companies = [];
+    }
+    renderCompanies();
+  }
+
+  async function loadStats() {
+    try {
+      const stats = await apiFetch('/companies/stats');
+      document.getElementById('metric-total').textContent = stats.totalCompanies;
+      document.getElementById('metric-highest').textContent = `${stats.highestCtc} LPA`;
+      document.getElementById('metric-active').textContent = stats.activeDrives;
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      showApiError(connectionHint(err));
+    }
+  }
+
+  async function loadApplications() {
+    try {
+      // Students: /applications is self-scoped (own applications only).
+      // Officers: /applications/all is the college-wide, officer-gated view.
+      applications = await apiFetch(isOfficer() ? '/applications/all' : '/applications');
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      showApiError(connectionHint(err));
+      applications = [];
+    }
+    renderApplications();
+  }
+
+  // ---------------- Company Grid ----------------
+  function formatDate(d) {
+    return new Date(d).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function renderCompanies() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const minCtc = parseFloat(document.getElementById('min-ctc-slider').value);
+
+    const filtered = companies.filter(c =>
+      c.name.toLowerCase().includes(search) && c.ctc >= minCtc
+    );
+
+    const grid = document.getElementById('company-grid');
+    const empty = document.getElementById('company-empty');
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      empty.classList.remove('hidden');
+    } else {
+      empty.classList.add('hidden');
+      grid.innerHTML = filtered.map(c => `
+        <div class="bg-white rounded-xl border border-[#E2E8F0] p-5 hover:border-[#789885] transition group fade-in">
+          <div class="flex items-start justify-between mb-3">
+            <div class="w-11 h-11 rounded-xl bg-[#0D5C63]/10 flex items-center justify-center">
+              <i data-lucide="building-2" class="w-5 h-5 text-[#0D5C63]"></i>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#64748B] flex items-center gap-1">
+              <i data-lucide="calendar" class="w-3 h-3"></i> ${formatDate(c.visitDate)}
+            </span>
           </div>
-          <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#F1F5F9] text-[#64748B] flex items-center gap-1">
-            <i data-lucide="calendar" class="w-3 h-3"></i> ${formatDate(c.visitDate)}
-          </span>
-        </div>
-        <h3 class="text-base font-bold text-[#1E293B] mb-1">${c.name}</h3>
-        <p class="text-xs text-[#64748B] mb-3 leading-relaxed">${c.eligibilityCriteria}</p>
-        <div class="flex items-center justify-between pt-3 border-t border-[#E2E8F0]">
-          <span class="text-xs font-medium text-[#64748B]">Package</span>
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-bold text-[#0D5C63]">${c.ctc} LPA</span>
-            <button onclick="deleteCompany(${c.id}, '${c.name.replace(/'/g, "\\'")}')" title="Delete company" class="text-[#94A3B8] hover:text-red-600 transition opacity-0 group-hover:opacity-100">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-  lucide.createIcons();
-}
-
-// ---------------- Applications Table ----------------
-function renderApplications() {
-  renderStatusChart();
-
-  const tbody = document.getElementById('applications-tbody');
-  const empty = document.getElementById('applications-empty');
-  document.getElementById('app-count').textContent = `${applications.length} total`;
-
-  if (applications.length === 0) {
-    tbody.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
-  }
-  empty.classList.add('hidden');
-
-  tbody.innerHTML = applications.map(a => {
-    const companyName = a.companyName || 'Unknown';
-    const displayStatus = ENUM_TO_STATUS[a.status] || a.status;
-    return `
-      <tr class="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F8FAFC] transition">
-        <td class="px-6 py-4 font-semibold text-[#1E293B]">${a.studentName}</td>
-        <td class="px-6 py-4 text-[#64748B]">${a.studentRoll}</td>
-        <td class="px-6 py-4 text-[#334155]">${companyName}</td>
-        <td class="px-6 py-4 relative">
-          <div class="status-wrapper relative inline-block" data-id="${a.id}">
-            <button onclick="toggleDropdown(event, ${a.id})" class="${statusStyles[displayStatus]} text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition hover:opacity-80">
-              <span class="w-1.5 h-1.5 rounded-full ${displayStatus === 'Selected' ? 'bg-[#0D5C63]' : displayStatus === 'Shortlisted' ? 'bg-blue-600' : displayStatus === 'Rejected' ? 'bg-red-500' : 'bg-slate-400'}"></span>
-              ${displayStatus}
-              <i data-lucide="chevron-down" class="w-3 h-3"></i>
-            </button>
-            <div class="status-dropdown absolute left-0 mt-1.5 w-40 bg-white rounded-lg border border-[#E2E8F0] shadow-lg z-20 py-1.5 overflow-hidden">
-              ${statusOptions.map(s => `
-                <button onclick="updateStatus(${a.id}, '${s}')" class="w-full text-left px-3.5 py-2 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-full ${s === 'Selected' ? 'bg-[#0D5C63]' : s === 'Shortlisted' ? 'bg-blue-600' : s === 'Rejected' ? 'bg-red-500' : 'bg-slate-400'}"></span>
-                  ${s}
-                </button>
-              `).join('')}
+          <h3 class="text-base font-bold text-[#1E293B] mb-1">${c.name}</h3>
+          <p class="text-xs text-[#64748B] mb-3 leading-relaxed">${c.eligibilityCriteria}</p>
+          <div class="flex items-center justify-between pt-3 border-t border-[#E2E8F0]">
+            <span class="text-xs font-medium text-[#64748B]">Package</span>
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-bold text-[#0D5C63]">${c.ctc} LPA</span>
+              ${isOfficer() ? `
+              <button onclick="deleteCompany(${c.id}, '${c.name.replace(/'/g, "\\'")}')" title="Delete company" class="text-[#94A3B8] hover:text-red-600 transition opacity-0 group-hover:opacity-100">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>` : ''}
             </div>
           </div>
-        </td>
-        <td class="px-6 py-4 text-right">
-          <button onclick="deleteApplication(${a.id}, '${a.studentName.replace(/'/g, "\\'")}')" title="Delete application" class="text-[#94A3B8] hover:text-red-600 transition">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
-  lucide.createIcons();
-}
-
-function renderStatusChart() {
-  const counts = { Applied: 0, Shortlisted: 0, Selected: 0, Rejected: 0 };
-  applications.forEach(a => {
-    const displayStatus = ENUM_TO_STATUS[a.status] || a.status;
-    if (counts[displayStatus] !== undefined) counts[displayStatus]++;
-  });
-
-  const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
-  const chartContent = document.getElementById('status-chart-content');
-  const emptyState = document.getElementById('status-chart-empty');
-
-  if (total === 0) {
-    chartContent.classList.add('hidden');
-    emptyState.classList.remove('hidden');
-    return;
+        </div>
+      `).join('');
+    }
+    lucide.createIcons();
   }
-  chartContent.classList.remove('hidden');
-  emptyState.classList.add('hidden');
 
-  const labels = Object.keys(counts);
-  const data = Object.values(counts);
-  const colors = labels.map(l => STATUS_COLORS[l]);
+  // ---------------- Applications Table ----------------
+  function renderApplications() {
+    const tbody = document.getElementById('applications-tbody');
+    const empty = document.getElementById('applications-empty');
+    document.getElementById('app-count').textContent = `${applications.length} total`;
 
-  const ctx = document.getElementById('status-chart').getContext('2d');
-  if (statusChart) {
-    statusChart.data.datasets[0].data = data;
-    statusChart.update();
-  } else {
-    statusChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{ data, backgroundColor: colors, borderWidth: 0 }],
-      },
-      options: {
-        cutout: '68%',
-        plugins: { legend: { display: false } },
-        responsive: true,
-        maintainAspectRatio: true,
-      },
+    if (applications.length === 0) {
+      tbody.innerHTML = '';
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+
+    const officer = isOfficer();
+    tbody.innerHTML = applications.map(a => {
+      const companyName = a.companyName || 'Unknown';
+      const displayStatus = ENUM_TO_STATUS[a.status] || a.status;
+      const dot = (s) => s === 'Selected' ? 'bg-[#0D5C63]' : s === 'Shortlisted' ? 'bg-blue-600' : s === 'Rejected' ? 'bg-red-500' : 'bg-slate-400';
+
+      // Officers change the status via a dropdown; students see a read-only badge.
+      const statusCell = officer ? `
+            <div class="status-wrapper relative inline-block" data-id="${a.id}">
+              <button onclick="toggleDropdown(event, ${a.id})" class="${statusStyles[displayStatus]} text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition hover:opacity-80">
+                <span class="w-1.5 h-1.5 rounded-full ${dot(displayStatus)}"></span>
+                ${displayStatus}
+                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+              </button>
+              <div class="status-dropdown absolute left-0 mt-1.5 w-40 bg-white rounded-lg border border-[#E2E8F0] shadow-lg z-20 py-1.5 overflow-hidden">
+                ${statusOptions.map(s => `
+                  <button onclick="updateStatus(${a.id}, '${s}')" class="w-full text-left px-3.5 py-2 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full ${dot(s)}"></span>
+                    ${s}
+                  </button>
+                `).join('')}
+              </div>
+            </div>` : `
+            <span class="${statusStyles[displayStatus]} text-xs font-semibold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full ${dot(displayStatus)}"></span>
+              ${displayStatus}
+            </span>`;
+
+      const actionsCell = officer ? `
+          <td class="px-6 py-4 text-right">
+            <button onclick="deleteApplication(${a.id}, '${a.studentName.replace(/'/g, "\\'")}')" title="Delete application" class="text-[#94A3B8] hover:text-red-600 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>` : '';
+
+      return `
+        <tr class="border-b border-[#E2E8F0] last:border-0 hover:bg-[#F8FAFC] transition">
+          <td class="px-6 py-4 font-semibold text-[#1E293B]">${a.studentName}</td>
+          <td class="px-6 py-4 text-[#64748B]">${a.studentRoll}</td>
+          <td class="px-6 py-4 text-[#334155]">${companyName}</td>
+          <td class="px-6 py-4 relative">${statusCell}</td>
+          ${actionsCell}
+        </tr>
+      `;
+    }).join('');
+    lucide.createIcons();
+  }
+
+  function toggleDropdown(e, id) {
+    e.stopPropagation();
+    document.querySelectorAll('.status-wrapper').forEach(w => {
+      if (w.dataset.id == id) w.classList.toggle('open');
+      else w.classList.remove('open');
     });
   }
-
-  const legend = document.getElementById('status-chart-legend');
-  legend.innerHTML = labels.map((label, i) => {
-    const count = data[i];
-    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-    return `
-      <div class="flex items-center justify-between text-sm">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${colors[i]}"></span>
-          <span class="text-[#334155] font-medium">${label}</span>
-        </div>
-        <span class="text-[#64748B]">${count} <span class="text-[#94A3B8]">(${pct}%)</span></span>
-      </div>
-    `;
-  }).join('');
-}
-
-function toggleDropdown(e, id) {
-  e.stopPropagation();
-  document.querySelectorAll('.status-wrapper').forEach(w => {
-    if (w.dataset.id == id) w.classList.toggle('open');
-    else w.classList.remove('open');
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.status-wrapper').forEach(w => w.classList.remove('open'));
   });
-}
-document.addEventListener('click', () => {
-  document.querySelectorAll('.status-wrapper').forEach(w => w.classList.remove('open'));
-});
 
-async function updateStatus(id, newStatus) {
-  document.querySelectorAll('.status-wrapper').forEach(w => w.classList.remove('open'));
-  try {
-    await apiFetch(`/applications/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: STATUS_TO_ENUM[newStatus] }),
-    });
-    await loadApplications();
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't update status: ${err.message}`);
-  }
-}
-
-async function deleteCompany(id, name) {
-  if (!confirm(`Move ${name} to trash? You can restore it anytime from Trash.`)) {
-    return;
-  }
-  try {
-    await apiFetch(`/companies/${id}`, { method: 'DELETE' });
-    await Promise.all([loadCompanies(), loadStats(), loadApplications()]);
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't delete company: ${err.message}`);
-  }
-}
-
-async function deleteApplication(id, studentName) {
-  if (!confirm(`Move ${studentName}'s application to trash? You can restore it anytime from Trash.`)) {
-    return;
-  }
-  async function loadTrash() {
-  try {
-    const [trashedCompanies, trashedApplications] = await Promise.all([
-      apiFetch('/companies/trash'),
-      apiFetch('/applications/trash'),
-    ]);
-    renderTrash(trashedCompanies, trashedApplications);
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(connectionHint(err));
-  }
-}
-
-function renderTrash(companies, applications) {
-  const companiesList = document.getElementById('trash-companies-list');
-  const companiesEmpty = document.getElementById('trash-companies-empty');
-  if (companies.length === 0) {
-    companiesList.innerHTML = '';
-    companiesEmpty.classList.remove('hidden');
-  } else {
-    companiesEmpty.classList.add('hidden');
-    companiesList.innerHTML = companies.map(c => `
-      <div class="bg-white rounded-xl border border-[#E2E8F0] p-4 flex items-center justify-between gap-4">
-        <div class="min-w-0">
-          <p class="text-sm font-bold text-[#1E293B] truncate">${c.name}</p>
-          <p class="text-xs text-[#64748B]">${c.ctc} LPA &middot; Deleted ${formatDateTime(c.deletedAt)}</p>
-        </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <button onclick="restoreCompany(${c.id})" class="text-xs font-semibold text-[#0D5C63] hover:underline px-3 py-1.5">Restore</button>
-          <button onclick="permanentlyDeleteCompany(${c.id}, '${c.name.replace(/'/g, "\\'")}')" class="text-xs font-semibold text-red-600 hover:underline px-3 py-1.5">Delete Forever</button>
-        </div>
-      </div>
-    `).join('');
+  async function updateStatus(id, newStatus) {
+    document.querySelectorAll('.status-wrapper').forEach(w => w.classList.remove('open'));
+    try {
+      await apiFetch(`/applications/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: STATUS_TO_ENUM[newStatus] }),
+      });
+      await loadApplications();
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      showApiError(`Couldn't update status: ${err.message}`);
+    }
   }
 
-  const appsList = document.getElementById('trash-applications-list');
-  const appsEmpty = document.getElementById('trash-applications-empty');
-  if (applications.length === 0) {
-    appsList.innerHTML = '';
-    appsEmpty.classList.remove('hidden');
-  } else {
-    appsEmpty.classList.add('hidden');
-    appsList.innerHTML = applications.map(a => `
-      <div class="bg-white rounded-xl border border-[#E2E8F0] p-4 flex items-center justify-between gap-4">
-        <div class="min-w-0">
-          <p class="text-sm font-bold text-[#1E293B] truncate">${a.studentName} <span class="text-[#94A3B8] font-normal">&rarr; ${a.companyName}</span></p>
-          <p class="text-xs text-[#64748B]">${a.studentRoll} &middot; Deleted ${formatDateTime(a.deletedAt)}</p>
-        </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <button onclick="restoreApplication(${a.id})" class="text-xs font-semibold text-[#0D5C63] hover:underline px-3 py-1.5">Restore</button>
-          <button onclick="permanentlyDeleteApplication(${a.id}, '${a.studentName.replace(/'/g, "\\'")}')" class="text-xs font-semibold text-red-600 hover:underline px-3 py-1.5">Delete Forever</button>
-        </div>
-      </div>
-    `).join('');
+  async function deleteCompany(id, name) {
+    if (!confirm(`Delete ${name}? This will also remove any applications submitted to this company. This can't be undone.`)) {
+      return;
+    }
+    try {
+      await apiFetch(`/companies/${id}`, { method: 'DELETE' });
+      await Promise.all([loadCompanies(), loadStats(), loadApplications()]);
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      showApiError(`Couldn't delete company: ${err.message}`);
+    }
   }
-  lucide.createIcons();
-}
 
-async function restoreCompany(id) {
-  try {
-    await apiFetch(`/companies/${id}/restore`, { method: 'PUT' });
-    await Promise.all([loadTrash(), loadCompanies(), loadStats()]);
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't restore company: ${err.message}`);
+  async function deleteApplication(id, studentName) {
+    if (!confirm(`Delete ${studentName}'s application? This can't be undone.`)) {
+      return;
+    }
+    try {
+      await apiFetch(`/applications/${id}`, { method: 'DELETE' });
+      await loadApplications();
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      showApiError(`Couldn't delete application: ${err.message}`);
+    }
   }
-}
 
-async function permanentlyDeleteCompany(id, name) {
-  if (!confirm(`Permanently delete ${name}? This cannot be undone.`)) {
-    return;
-  }
-  try {
-    await apiFetch(`/companies/${id}/permanent`, { method: 'DELETE' });
-    await loadTrash();
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't permanently delete company: ${err.message}`);
-  }
-}
+  // =================================================================
+  // Company Form (Companies tab)
+  // =================================================================
+  document.getElementById('company-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('company-submit-btn');
+    const errorBox = document.getElementById('company-form-error');
+    errorBox.classList.add('hidden');
+    btn.disabled = true;
 
-async function restoreApplication(id) {
-  try {
-    await apiFetch(`/applications/${id}/restore`, { method: 'PUT' });
-    await Promise.all([loadTrash(), loadApplications()]);
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't restore application: ${err.message}`);
-  }
-}
+    const payload = {
+      name: document.getElementById('c-name').value,
+      ctc: parseFloat(document.getElementById('c-ctc').value),
+      eligibilityCriteria: document.getElementById('c-eligibility').value,
+      visitDate: document.getElementById('c-date').value,
+    };
 
-async function permanentlyDeleteApplication(id, name) {
-  if (!confirm(`Permanently delete ${name}'s application? This cannot be undone.`)) {
-    return;
-  }
-  try {
-    await apiFetch(`/applications/${id}/permanent`, { method: 'DELETE' });
-    await loadTrash();
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't permanently delete application: ${err.message}`);
-  }
-}
-  try {
-    await apiFetch(`/applications/${id}`, { method: 'DELETE' });
-    await loadApplications();
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    showApiError(`Couldn't delete application: ${err.message}`);
-  }
-}
+    try {
+      await apiFetch('/companies', { method: 'POST', body: JSON.stringify(payload) });
+      e.target.reset();
+      await Promise.all([loadCompanies(), loadStats()]);
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
-// =================================================================
-// Company Form (Companies tab)
-// =================================================================
-document.getElementById('company-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('company-submit-btn');
-  const errorBox = document.getElementById('company-form-error');
-  errorBox.classList.add('hidden');
-  btn.disabled = true;
+  document.getElementById('search-input').addEventListener('input', renderCompanies);
+  document.getElementById('min-ctc-slider').addEventListener('input', (e) => {
+    document.getElementById('min-ctc-label').textContent = `${e.target.value} LPA`;
+    renderCompanies();
+  });
 
-  const payload = {
-    name: document.getElementById('c-name').value,
-    ctc: parseFloat(document.getElementById('c-ctc').value),
-    eligibilityCriteria: document.getElementById('c-eligibility').value,
-    visitDate: document.getElementById('c-date').value,
-  };
+  // =================================================================
+  // Application Form (Students): searchable company combobox
+  // =================================================================
+  function renderCompanyDropdown(query) {
+    const dropdown = document.getElementById('a-company-dropdown');
+    const q = query.trim().toLowerCase();
+    const matches = q ? companies.filter(c => c.name.toLowerCase().includes(q)) : companies;
 
-  try {
-    await apiFetch('/companies', { method: 'POST', body: JSON.stringify(payload) });
-    e.target.reset();
-    await Promise.all([loadCompanies(), loadStats()]);
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-document.getElementById('search-input').addEventListener('input', renderCompanies);
-document.getElementById('min-ctc-slider').addEventListener('input', (e) => {
-  document.getElementById('min-ctc-label').textContent = `${e.target.value} LPA`;
-  renderCompanies();
-});
-
-// =================================================================
-// Application Form: searchable "select or add" company combobox
-// =================================================================
-function renderCompanyDropdown(query) {
-  const dropdown = document.getElementById('a-company-dropdown');
-  const q = query.trim().toLowerCase();
-  const matches = q ? companies.filter(c => c.name.toLowerCase().includes(q)) : companies;
-
-  let html = matches.slice(0, 8).map(c => `
-    <button type="button" data-id="${c.id}" data-name="${c.name.replace(/"/g, '&quot;')}" class="company-option w-full text-left px-3.5 py-2 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center justify-between">
-      <span>${c.name}</span><span class="text-[#94A3B8]">${c.ctc} LPA</span>
-    </button>
-  `).join('');
-
-  const exactMatch = companies.some(c => c.name.toLowerCase() === q);
-  if (q && !exactMatch) {
-    html += `
-      <button type="button" id="add-new-company-option" class="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#0D5C63] hover:bg-[#789885]/10 transition flex items-center gap-2 border-t border-[#E2E8F0]">
-        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Add "${query.trim()}" as a new company
+    let html = matches.slice(0, 8).map(c => `
+      <button type="button" data-id="${c.id}" data-name="${c.name.replace(/"/g, '&quot;')}" class="company-option w-full text-left px-3.5 py-2 text-xs font-medium text-[#334155] hover:bg-[#F1F5F9] transition flex items-center justify-between">
+        <span>${c.name}</span><span class="text-[#94A3B8]">${c.ctc} LPA</span>
       </button>
-    `;
+    `).join('');
+
+    if (!html) {
+      html = `<div class="px-3.5 py-3 text-xs text-[#94A3B8]">No matching drive. Check the Companies tab to see what's open.</div>`;
+    }
+
+    dropdown.innerHTML = html;
+    dropdown.classList.remove('hidden');
+
+    dropdown.querySelectorAll('.company-option').forEach(btn => {
+      btn.addEventListener('click', () => selectExistingCompany(btn.dataset.id, btn.dataset.name));
+    });
   }
 
-  if (!html) {
-    html = `<div class="px-3.5 py-3 text-xs text-[#94A3B8]">No companies yet — type a name to add one.</div>`;
-  }
-
-  dropdown.innerHTML = html;
-  dropdown.classList.remove('hidden');
-  lucide.createIcons();
-
-  dropdown.querySelectorAll('.company-option').forEach(btn => {
-    btn.addEventListener('click', () => selectExistingCompany(btn.dataset.id, btn.dataset.name));
-  });
-  const addBtn = document.getElementById('add-new-company-option');
-  if (addBtn) addBtn.addEventListener('click', () => openNewCompanyPanel(query.trim()));
-}
-
-function selectExistingCompany(id, name) {
-  document.getElementById('a-company-id').value = id;
-  document.getElementById('a-company-search').value = name;
-  document.getElementById('a-company-dropdown').classList.add('hidden');
-  document.getElementById('a-new-company-panel').classList.add('hidden');
-}
-
-function openNewCompanyPanel(name) {
-  pendingNewCompanyName = name;
-  document.getElementById('a-company-id').value = '';
-  document.getElementById('a-company-dropdown').classList.add('hidden');
-  document.getElementById('a-new-company-panel').classList.remove('hidden');
-  const dateInput = document.getElementById('a-new-company-date');
-  if (!dateInput.value) dateInput.valueAsDate = new Date();
-}
-
-document.getElementById('a-company-search').addEventListener('input', (e) => {
-  document.getElementById('a-company-id').value = '';
-  renderCompanyDropdown(e.target.value);
-});
-document.getElementById('a-company-search').addEventListener('focus', (e) => renderCompanyDropdown(e.target.value));
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#a-company-search') && !e.target.closest('#a-company-dropdown')) {
+  function selectExistingCompany(id, name) {
+    document.getElementById('a-company-id').value = id;
+    document.getElementById('a-company-search').value = name;
     document.getElementById('a-company-dropdown').classList.add('hidden');
   }
-});
 
-document.getElementById('a-new-company-cancel').addEventListener('click', () => {
-  document.getElementById('a-new-company-panel').classList.add('hidden');
-  document.getElementById('a-company-search').value = '';
-  pendingNewCompanyName = '';
-});
+  document.getElementById('a-company-search').addEventListener('input', (e) => {
+    document.getElementById('a-company-id').value = '';
+    renderCompanyDropdown(e.target.value);
+  });
+  document.getElementById('a-company-search').addEventListener('focus', (e) => renderCompanyDropdown(e.target.value));
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#a-company-search') && !e.target.closest('#a-company-dropdown')) {
+      document.getElementById('a-company-dropdown').classList.add('hidden');
+    }
+  });
 
-document.getElementById('a-new-company-confirm').addEventListener('click', async () => {
-  const ctc = parseFloat(document.getElementById('a-new-company-ctc').value);
-  const eligibilityCriteria = document.getElementById('a-new-company-eligibility').value.trim();
-  const visitDate = document.getElementById('a-new-company-date').value;
-  const errorBox = document.getElementById('application-form-error');
-
-  if (!pendingNewCompanyName || isNaN(ctc) || !eligibilityCriteria || !visitDate) {
-    errorBox.textContent = 'Fill in CTC, eligibility, and visit date to add the new company.';
-    errorBox.classList.remove('hidden');
-    return;
-  }
-
-  try {
-    const created = await apiFetch('/companies', {
-      method: 'POST',
-      body: JSON.stringify({ name: pendingNewCompanyName, ctc, eligibilityCriteria, visitDate }),
-    });
-    await Promise.all([loadCompanies(), loadStats()]);
-    selectExistingCompany(created.id, created.name);
-    document.getElementById('a-new-company-panel').classList.add('hidden');
-    document.getElementById('a-new-company-ctc').value = '';
-    document.getElementById('a-new-company-eligibility').value = '';
-    document.getElementById('a-new-company-date').value = '';
+  document.getElementById('application-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('application-submit-btn');
+    const errorBox = document.getElementById('application-form-error');
     errorBox.classList.add('hidden');
-  } catch (err) {
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  }
-});
 
-document.getElementById('application-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('application-submit-btn');
-  const errorBox = document.getElementById('application-form-error');
-  errorBox.classList.add('hidden');
+    const companyId = parseInt(document.getElementById('a-company-id').value);
+    if (!companyId) {
+      errorBox.textContent = 'Search for a company and pick it from the list before submitting.';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    btn.disabled = true;
 
-  const companyId = parseInt(document.getElementById('a-company-id').value);
-  if (!companyId) {
-    errorBox.textContent = 'Search for a company and select it (or add it as new) before submitting.';
-    errorBox.classList.remove('hidden');
-    return;
-  }
-  btn.disabled = true;
+    // The backend fills in the student's name and roll from their profile —
+    // the request body is just the company.
+    try {
+      await apiFetch('/applications', { method: 'POST', body: JSON.stringify({ companyId }) });
+      e.target.reset();
+      await loadApplications();
+      hideApiError();
+    } catch (err) {
+      console.error(err);
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
-  const payload = {
-    studentName: document.getElementById('a-name').value,
-    studentRoll: document.getElementById('a-roll').value,
-    companyId,
-  };
-
-  try {
-    await apiFetch('/applications', { method: 'POST', body: JSON.stringify(payload) });
-    e.target.reset();
-    document.getElementById('a-new-company-panel').classList.add('hidden');
-    pendingNewCompanyName = '';
-    await loadApplications();
-    hideApiError();
-  } catch (err) {
-    console.error(err);
-    errorBox.textContent = err.message;
-    errorBox.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// =================================================================
-// Init — starts on the landing page; nothing loads until login/register
-// =================================================================
-showScreen('landing');
-animateLandingPipeline();
+  // =================================================================
+  // Init — starts on the landing page; nothing loads until login/register
+  // =================================================================
+  showScreen('landing');
+  animateLandingPipeline();
 </script>
 
 </body>
