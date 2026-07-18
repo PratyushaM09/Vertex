@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserService {
                 .fullName(dto.getFullName().trim())
                 .email(normalizedEmail)
                 .password(passwordEncoder.encode(dto.getPassword()))
-                .rollNumber(dto.getRollNumber().trim().toUpperCase())
                 .role(UserRole.STUDENT)
                 .build();
 
