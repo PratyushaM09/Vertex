@@ -28,4 +28,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             "WHERE a.deletedAt IS NULL " +
             "ORDER BY a.applyDate DESC, a.id DESC")
     List<Application> findAllActiveWithCompanyAndOwner();
+
+    boolean existsByOwnerIdAndCompanyIdAndDeletedAtIsNull(Long ownerId, Long companyId);
+
+    Optional<Application> findByIdAndDeletedAtIsNull(Long id);
 }

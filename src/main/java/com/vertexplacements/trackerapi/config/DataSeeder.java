@@ -6,11 +6,13 @@ import com.vertexplacements.trackerapi.entity.UserRole;
 import com.vertexplacements.trackerapi.repository.CompanyRepository;
 import com.vertexplacements.trackerapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -20,32 +22,47 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /** Set via the ADMIN_PASSWORD environment variable (see application properties). */
+    @Value("${app.admin-password:}")
+    private String adminPassword;
+
+    /** Sample companies are only seeded when SEED_DEMO_DATA=true. */
+    @Value("${app.seed-demo-data:false}")
+    private boolean seedDemoData;
+
     private static final String DEMO_EMAIL = "admin@vertexplacements.com";
-    private static final String DEMO_PASSWORD = "password123";
 
     @Override
     public void run(String... args) {
-        seedDemoOfficer();
-        seedCompanies();
+        seedAdminOfficer();
+        if (seedDemoData) {
+            seedCompanies();
+        }
     }
 
-    private void seedDemoOfficer() {
-        if (userRepository.count() > 0) {
+    private void seedAdminOfficer() {
+        // Check for the admin specifically — not user count — so the admin is
+        // recreated even when student accounts already exist.
+        if (userRepository.findByEmail(DEMO_EMAIL).isPresent()) {
             return;
         }
+
+        String password = (adminPassword != null && !adminPassword.isBlank())
+                ? adminPassword
+                : UUID.randomUUID().toString();
+
         userRepository.save(User.builder()
-                .fullName("Demo Admin")
+                .fullName("Placement Officer")
                 .email(DEMO_EMAIL)
-                .password(passwordEncoder.encode(DEMO_PASSWORD))
+                .password(passwordEncoder.encode(password))
                 .role(UserRole.PLACEMENT_OFFICER)
                 .build());
 
-        System.out.println("=================================================================");
-        System.out.println(" VertexPlacements demo Placement Officer login created:");
-        System.out.println("   Email:    " + DEMO_EMAIL);
-        System.out.println("   Password: " + DEMO_PASSWORD);
-        System.out.println(" Register a separate account to try the student experience.");
-        System.out.println("=================================================================");
+        if (adminPassword == null || adminPassword.isBlank()) {
+            System.out.println("ADMIN_PASSWORD not set — generated one-time admin password: " + password);
+        } else {
+            System.out.println("Placement Officer account created for " + DEMO_EMAIL);
+        }
     }
 
     private void seedCompanies() {
@@ -55,7 +72,7 @@ public class DataSeeder implements CommandLineRunner {
 
         User demoOfficer = userRepository.findByEmail(DEMO_EMAIL)
                 .orElseThrow(() -> new IllegalStateException(
-                        "Demo officer should already exist by the time companies are seeded"));
+                        "Admin officer should already exist by the time companies are seeded"));
 
         companyRepository.save(Company.builder()
                 .name("Google").ctc(42.0).eligibilityCriteria("CGPA > 8.0, No backlogs")

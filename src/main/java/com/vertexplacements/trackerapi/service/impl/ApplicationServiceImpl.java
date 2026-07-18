@@ -15,6 +15,7 @@ import com.vertexplacements.trackerapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import  com.vertexplacements.trackerapi.entity.UserRole;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,27 +68,48 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application saved = applicationRepository.save(application);
         return toResponseDTO(saved);
+
+        // Roll number: use profile, or accept it once from the request and autosave it.
+        if (student.getRollNumber() == null || student.getRollNumber().isBlank()) {
+            if (dto.getRollNumber() == null || dto.getRollNumber().isBlank()) {
+                throw new IllegalArgumentException("Add your roll number to apply");
+            }
+            student.setRollNumber(dto.getRollNumber().trim()); // managed entity — persisted on commit
+        }
+
+// One application per company per student.
+        if (applicationRepository.existsByOwnerIdAndCompanyIdAndDeletedAtIsNull(
+                student.getId(), company.getId())) {
+            throw new IllegalArgumentException("You've already applied to this company");
+        }
     }
 
     @Override
     public ApplicationResponseDTO updateStatus(String ownerEmail, Long id, StatusUpdateDTO dto) {
-        Long ownerId = currentUserId(ownerEmail);
-        Application application = applicationRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
-                .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
-
+        Application application = findOwnedOrOfficer(ownerEmail, id);
         application.setStatus(dto.getStatus());
-        Application saved = applicationRepository.save(application);
-        return toResponseDTO(saved);
+        return toResponseDTO(applicationRepository.save(application));
     }
 
     @Override
     public void deleteApplication(String ownerEmail, Long id) {
-        Long ownerId = currentUserId(ownerEmail);
-        Application application = applicationRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, ownerId)
-                .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
+        Application application = findOwnedOrOfficer(ownerEmail, id);
         application.setDeletedAt(LocalDateTime.now());
         applicationRepository.save(application);
     }
+
+    /** Officers can act on any active application; students only on their own. */
+    private Application findOwnedOrOfficer(String email, Long id) {
+        User caller = userService.getUserEntityByEmail(email);
+        if (caller.getRole() == UserRole.PLACEMENT_OFFICER) {
+            return applicationRepository.findByIdAndDeletedAtIsNull(id)
+                    .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
+        }
+        return applicationRepository.findByIdAndOwnerIdAndDeletedAtIsNull(id, caller.getId())
+                .orElseThrow(() -> ResourceNotFoundException.forApplication(id));
+    }
+
+
 
     @Override
     @Transactional(readOnly = true)
